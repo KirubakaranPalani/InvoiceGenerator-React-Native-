@@ -1,0 +1,53 @@
+{
+  "expo": {
+    "name": "InvoiceGenerator",
+    "slug": "BillingSystem",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/logo/sm.png",
+    "scheme": "myapp",
+    "userInterfaceStyle": "automatic",
+    "androidStatusBar": {
+      "backgroundColor": "#ffffff", // Match splash.backgroundColor
+      "translucent": false
+    },
+    "androidNavigationBar": {
+      "backgroundColor": "#000000"
+    },
+    "splash": {
+      "image": "./assets/logo/sm.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff" // Match androidStatusBar.backgroundColor
+    },
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/logo/sm.png",
+        "backgroundColor": "#0000"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/logo/sm.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/logo/sm.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
