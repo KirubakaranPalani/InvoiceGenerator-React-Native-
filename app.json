@@ -7,6 +7,9 @@
     "icon": "./assets/logo/sm.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
+    "assetBundlePatterns": [
+      "assets/**/*"
+    ],
     "androidStatusBar": {
       "backgroundColor": "#ffffff", // Match splash.backgroundColor
       "translucent": false
@@ -27,7 +30,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/logo/sm.png",
         "backgroundColor": "#0000"
-      }
+      },
+      "package": "com.karanmsd.BillingSystem"
     },
     "web": {
       "bundler": "metro",
@@ -48,6 +52,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "1d69268b-ad3c-4bb2-a715-34283d272bbe"
+      }
     }
   }
 }

@@ -5,7 +5,6 @@ import {
   Keyboard
 } from 'react-native';
 import { TextInput } from 'react-native-paper';
-
 import * as Print from 'expo-print';
 import { useTheme } from '../context/ThemeContext';
 import Container from '../components/Container';
@@ -15,8 +14,8 @@ import CheckoutSummary from '../components/checkout/CheckoutSummary';
 import ProductSearch from '../components/checkout/ProductSearch';
 import getCheckoutStyles from '../styles/CheckoutStyles';
 import { Asset } from 'expo-asset';
-import * as FileSystem from 'expo-file-system';
 import SmLogo from '../../assets/logo/SmLogo.png';
+// import { Asset } from 'expo-asset';
 
 const Checkout = () => {
   const { isDarkMode } = useTheme();
@@ -26,31 +25,48 @@ const Checkout = () => {
   const [totalQuantity, setTotalQuantity] = useState(0);
   const [totalPrice, setTotalPrice] = useState(0);
   const [customerName, setCustomerName] = useState('');
-  const logoURI = SmLogo;
+  const logoURI = Asset.fromModule(SmLogo).uri;
   useEffect(() => {
     calculateSummary();
   }, [checkoutItems]);
 
-  const [logoBase64, setLogoBase64] = useState('');
+  // const [logoBase64, setLogoBase64] = useState('');
 
-  useEffect(() => {
-    // Load the image and convert to Base64
-    const loadLogo = async () => {
-      try {
-        const asset = Asset.fromModule(SmLogo);
-        await asset.downloadAsync(); // Ensure the image is downloaded
-        const base64 = await FileSystem.readAsStringAsync(asset.localUri || asset.uri, {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-        setLogoBase64(`data:image/png;base64,${base64}`);
-      } catch (error) {
-        console.error('Error loading logo image:', error);
-      }
-    };
+  // useEffect(() => {
+  //   // Load the image and convert to Base64
+  //   const loadLogo = async () => {
+  //     try {
+  //       const asset = Asset.fromModule(SmLogo);
+  //       // await asset.downloadAsync(); // Ensure the image is downloaded
+  //       const base64 = await FileSystem.readAsStringAsync(asset.localUri || asset.uri, {
+  //         encoding: FileSystem.EncodingType.Base64,
+  //       });
+  //       setLogoBase64(`data:image/png;base64,${base64}`);
+  //     } catch (error) {
+  //       console.error('Error loading logo image:', error);
+  //     }
+  //   };
 
-    loadLogo();
-  }, []);
+  //   loadLogo();
+  // }, []);
 
+  // const preloadAssets = async () => {
+  //   const images = [require('../../assets/logo/SmLogo.png')];
+  //   const cacheImages = images.map((image) => Asset.fromModule(image).downloadAsync());
+  //   await Promise.all(cacheImages);
+  // };
+
+  // useEffect(() => {
+  //   const initializeAssets = async () => {
+  //     try {
+  //       await preloadAssets();
+  //     } catch (error) {
+  //       console.error('Error preloading assets:', error);
+  //     }
+  //   };
+  
+  //   initializeAssets();
+  // }, []);
 
   const calculateSummary = () => {
     const totalQuantitySum = checkoutItems.reduce((sum, item) => {
@@ -239,7 +255,7 @@ const Checkout = () => {
             <div class="invoice-title">Invoice</div>
             <div class="invoice-header">
                 <div class="shop-details">
-                    <img src="${logoBase64}" alt="Shop Logo"/>
+                    <img src="${logoURI}" alt="Logo"/>
                       <div class = "shop-details-text"><strong> SM Electricals & Plumbings </strong> </div>
                       <div class = "shop-details-text"> No.56A, Arni Rd, Virupatchipuram,</div> 
                       <div class = "shop-details-text"> RV Nagar, Vellore, Tamil Nadu 632002</div>

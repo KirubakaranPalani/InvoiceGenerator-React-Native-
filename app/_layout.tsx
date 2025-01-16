@@ -7,6 +7,7 @@ import { ProductProvider } from '../src/context/ProductContext';
 import { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
+import { Asset } from 'expo-asset';
 
 const customTheme = {
   ...MD3LightTheme,
@@ -17,9 +18,16 @@ const customTheme = {
     outline: '#2196F3',
   },
 };
+
+const preloadAssets = async () => {
+  const assets = [require('../assets/logo/SmLogo.png')]; // Add other assets here if needed
+  const cacheAssets = assets.map((asset) => Asset.fromModule(asset).downloadAsync());
+  await Promise.all(cacheAssets);
+};
+
 const AppContent = () => {
   const db = useSQLiteContext();
-  const [isDbInitialized, setIsDbInitialized] = useState(false);
+  const [isAppReady, setIsAppReady] = useState(false);
 
   useEffect(() => {
     const initializeDatabase = async () => {
@@ -60,22 +68,22 @@ const AppContent = () => {
       `);
     };
 
-    const initialize = async () => {
+    const initializeApp = async () => {
       try {
         await SplashScreen.preventAutoHideAsync();
-        await initializeDatabase();
-        setIsDbInitialized(true);
+        await Promise.all([initializeDatabase(), preloadAssets()]);
+        setIsAppReady(true);
       } catch (error) {
-        console.error('Error during initialization:', error);
+        console.error('Error during app initialization:', error);
       } finally {
         SplashScreen.hideAsync();
       }
     };
 
-    initialize();
+    initializeApp();
   }, [db]);
 
-  if (!isDbInitialized) {
+  if (!isAppReady) {
     return null;
   }
 
@@ -90,7 +98,7 @@ export default function RootLayout() {
         <ToastProvider>
           <SQLiteProvider databaseName="billing.db">
             <ProductProvider>
-            <StatusBar style="light" backgroundColor="#000" translucent={false} />
+              <StatusBar style="light" backgroundColor="#000" translucent={false} />
               <AppContent />
             </ProductProvider>
           </SQLiteProvider>
