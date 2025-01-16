@@ -214,6 +214,48 @@ const createStyles = (colors) => StyleSheet.create({
     ...elevation.small,
     shadowColor: colors.shadow,
   },
+  paginationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+    backgroundColor: colors.surface,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  paginationButton: {
+    marginHorizontal: spacing.md,
+  },
+  paginationText: {
+    fontSize: typography.regular,
+    color: colors.text,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: spacing.xs,
+    paddingRight:7,
+  },
+  clearButton: {
+    backgroundColor: colors.importButton,
+    borderRadius: 10,
+    padding: 12,
+  },
+  
+  clearButtonText: {
+    color: colors.buttonText,
+    fontSize: typography.small,
+  },
+  searchInput: {
+  flex: 1,
+  height: 40,
+  borderColor: colors.border,
+  borderWidth: 1,
+  borderRadius: 5,
+  paddingHorizontal: 10,
+  marginRight: spacing.xs,
+  marginLeft: spacing.sm,
+},
 });
 
 export const getProductsStyles = (isDarkMode) => {

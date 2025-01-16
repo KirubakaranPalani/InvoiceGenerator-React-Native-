@@ -39,6 +39,7 @@ export const lightTheme = {
     xl: 12,
   },
   typography: {
+    xs: 10,
     small: 12,
     regular: 14,
     medium: 16,
@@ -88,6 +89,7 @@ export const darkTheme = {
     xl: 12,
   },
   typography: {
+    xs:8,
     small: 12,
     regular: 14,
     medium: 16,
