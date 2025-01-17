@@ -2,15 +2,18 @@ import React, { useState, useEffect } from 'react';
 import {
   View,
   Alert,
-  Keyboard
+  Keyboard,
+  SafeAreaView,
+  Text,
 } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import * as Print from 'expo-print';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
-import Container from '../components/Container';
 import HeaderComponent from '../components/HeaderComponent';
 import CheckoutTable from '../components/checkout/CheckoutTable';
 import CheckoutSummary from '../components/checkout/CheckoutSummary';
+import MinimizedCheckoutSummary from '../components/checkout/MinimizedCheckoutSummary';
 import ProductSearch from '../components/checkout/ProductSearch';
 import getCheckoutStyles from '../styles/CheckoutStyles';
 import { Asset } from 'expo-asset';
@@ -26,47 +29,24 @@ const Checkout = () => {
   const [totalPrice, setTotalPrice] = useState(0);
   const [customerName, setCustomerName] = useState('');
   const logoURI = Asset.fromModule(SmLogo).uri;
+  const [keyboardOn, setKeyboardOn] = useState(false);
+  // const showMinimizedSummary = keyboardOn;
   useEffect(() => {
     calculateSummary();
   }, [checkoutItems]);
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
+      setKeyboardOn(true); // Set margin to 0 when keyboard is open
+    });
+    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardOn(false); // Restore margin when keyboard is closed
+    });
 
-  // const [logoBase64, setLogoBase64] = useState('');
-
-  // useEffect(() => {
-  //   // Load the image and convert to Base64
-  //   const loadLogo = async () => {
-  //     try {
-  //       const asset = Asset.fromModule(SmLogo);
-  //       // await asset.downloadAsync(); // Ensure the image is downloaded
-  //       const base64 = await FileSystem.readAsStringAsync(asset.localUri || asset.uri, {
-  //         encoding: FileSystem.EncodingType.Base64,
-  //       });
-  //       setLogoBase64(`data:image/png;base64,${base64}`);
-  //     } catch (error) {
-  //       console.error('Error loading logo image:', error);
-  //     }
-  //   };
-
-  //   loadLogo();
-  // }, []);
-
-  // const preloadAssets = async () => {
-  //   const images = [require('../../assets/logo/SmLogo.png')];
-  //   const cacheImages = images.map((image) => Asset.fromModule(image).downloadAsync());
-  //   await Promise.all(cacheImages);
-  // };
-
-  // useEffect(() => {
-  //   const initializeAssets = async () => {
-  //     try {
-  //       await preloadAssets();
-  //     } catch (error) {
-  //       console.error('Error preloading assets:', error);
-  //     }
-  //   };
-  
-  //   initializeAssets();
-  // }, []);
+    return () => {
+      keyboardDidHideListener.remove();
+      keyboardDidShowListener.remove();
+    };
+  }, []);
 
   const calculateSummary = () => {
     const totalQuantitySum = checkoutItems.reduce((sum, item) => {
@@ -275,7 +255,6 @@ const Checkout = () => {
                             <th style="width: 50%;">Item Description</th>
                             <th style="width: 7.5%;">Qty.</th>
                             <th style="width: 12.5%;">Price</th>
-                            <th style="width: 10%;">Discount</th>
                             <th style="width: 15%;">Amount</th>
                         </tr>
                     </thead>
@@ -286,7 +265,6 @@ const Checkout = () => {
                                 <td>${item.name}</td>
                                 <td style="text-align: center;">${item.quantity}</td>
                                 <td>₹${item.price.toFixed(2)}</td>
-                                <td>${item.discount}%</td>
                                 <td>₹${item.totalPrice.toFixed(2)}</td>
                             </tr>
                         `).join('')}
@@ -374,7 +352,7 @@ const Checkout = () => {
   const finalPriceInWords = numberToWords(finalPrice) + " rupees only";
 
   return (
-    <Container>
+    <SafeAreaView style={styles.container}>
       <HeaderComponent title="Checkout" />
 
       {/* Product Search */}
@@ -416,6 +394,34 @@ const Checkout = () => {
           }}
         />
       </View>
+
+      {/* Table header */}
+      <View style={[styles.tableRow, styles.tableHeader, { zIndex: 1 }]}>
+        <Text style={[styles.tableCell, styles.cellBase, styles.serialCell]} numberOfLines={1}>
+          #
+        </Text>
+        <Text style={[styles.tableCell, styles.cellBase, styles.productCell]}>Product Info</Text>
+        <Text style={[styles.tableCell, styles.cellBase, styles.qtyCell]} numberOfLines={1}>
+          Qty
+        </Text>
+        <Text style={[styles.tableCell, styles.cellBase, styles.priceCell]} numberOfLines={1}>
+          Price ₹
+        </Text>
+        <Text style={[styles.tableCell, styles.cellBase, styles.discountCell]} numberOfLines={1}>
+          Disc
+        </Text>
+        <Text style={[styles.tableCell, styles.cellBase, styles.totalCell]} numberOfLines={1}>
+          Total
+        </Text>
+        <View style={[styles.cellBase, styles.actionCell, styles.headerIcon]}>
+          <MaterialIcons
+            name="delete-outline"
+            size={20}
+            color={isDarkMode ? '#fff' : '#000'}
+          />
+        </View>
+      </View>
+
       {/* Checkout Table */}
       <CheckoutTable
         checkoutItems={checkoutItems}
@@ -424,19 +430,35 @@ const Checkout = () => {
         styles={styles}
       />
       {/* Checkout Summary */}
-      <CheckoutSummary
-        checkoutItems={checkoutItems}
-        totalProducts={totalProducts}
-        totalQuantity={totalQuantity}
-        totalPrice={totalPrice}
-        customerName={customerName}
-        setCustomerName={setCustomerName}
-        handleGeneratePDF={handleGeneratePDF}
-        styles={styles}
-        isDarkMode={isDarkMode}
-        finalPriceInWords={finalPriceInWords}
-      />
-    </Container>
+      {keyboardOn ? (
+        <MinimizedCheckoutSummary
+          checkoutItems={checkoutItems}
+          totalProducts={totalProducts}
+          totalQuantity={totalQuantity}
+          totalPrice={totalPrice}
+          customerName={customerName}
+          setCustomerName={setCustomerName}
+          handleGeneratePDF={handleGeneratePDF}
+          styles={styles}
+          isDarkMode={isDarkMode}
+          finalPriceInWords={finalPriceInWords}
+        />
+      ) : (
+        <CheckoutSummary
+          checkoutItems={checkoutItems}
+          totalProducts={totalProducts}
+          totalQuantity={totalQuantity}
+          totalPrice={totalPrice}
+          customerName={customerName}
+          setCustomerName={setCustomerName}
+          handleGeneratePDF={handleGeneratePDF}
+          styles={styles}
+          isDarkMode={isDarkMode}
+          finalPriceInWords={finalPriceInWords}
+        />
+      )
+      }
+    </SafeAreaView>
   );
 };
 

@@ -8,7 +8,7 @@ const EditModal = ({ visible, product, onClose, onSave }) => {
     name: '',
     price: '',
     quantity: '',
-    discount: '',
+    discount: 0,
     measurementTypeId: 1,
   });
 
@@ -20,7 +20,7 @@ const EditModal = ({ visible, product, onClose, onSave }) => {
         name: product.name || '',
         price: product.price || '',
         quantity: product.quantity || '',
-        discount: product.discount || '',
+        discount: product.discount || 0,
         measurementTypeId: product.measurementTypeId || 1,
       });
     }

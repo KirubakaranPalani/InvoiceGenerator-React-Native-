@@ -3,7 +3,10 @@ import { spacing, typography, borderRadius, elevation, lightColors, darkColors }
 
 const createStyles = (colors, isDarkMode) => StyleSheet.create({
   container: {
-    backgroundColor: colors.background,
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
   },
   headerContainer: {
     backgroundColor: colors.surface,
@@ -42,18 +45,8 @@ const createStyles = (colors, isDarkMode) => StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
-  tableContainer: {
-    // if i commented flex and changed position to static, i can able to click input box
-    flex: 1,
-    marginTop: spacing.xs,
-    backgroundColor: colors.background,
-    maxHeight:400,
-    // position: 'static',
-    // zIndex: 1,
-  },
   tableHeader: {
-    backgroundColor: isDarkMode ? '#555' : '#f0f0f0',
-    paddingVertical: 10,
+    backgroundColor: isDarkMode ? '#3a3a3a' : '#f0f0f0',
     marginBottom: 3,
     borderRadius: 5,
     flexDirection: 'row',
@@ -63,15 +56,16 @@ const createStyles = (colors, isDarkMode) => StyleSheet.create({
   tableRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: isDarkMode ? '#444' : '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: isDarkMode ? '#444' : '#ccc',
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingVertical: 5,
     paddingHorizontal: 8,
-    marginBottom: 5,
     borderRadius: 5,
     borderWidth: 1,
     borderColor: colors.border,
-    zIndex: 1,  
-    ...elevation.small,
+    zIndex: 1,
   },
   tableCell: {
     color: isDarkMode ? '#fff' : '#000',
@@ -80,9 +74,11 @@ const createStyles = (colors, isDarkMode) => StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 8,
     zIndex: 1,
+    flex: 1,
   },
   cellBase: {
     paddingHorizontal: 1,
+    padding: 3
   },
   numericCell: {
     textAlign: 'center',
@@ -96,13 +92,13 @@ const createStyles = (colors, isDarkMode) => StyleSheet.create({
     flex: 0.5,
   },
   productCell: {
-    flex: 2.5,
+    flex: 2.8,
   },
   productInfo: {
     alignItems: 'flex-start',
-    paddingHorizontal: 10,
   },
   productId: {
+    fontWeight: 'bold',
     fontSize: typography.small,
     color: isDarkMode ? '#ffffff80' : '#00000080',
     marginBottom: 2,
@@ -115,16 +111,16 @@ const createStyles = (colors, isDarkMode) => StyleSheet.create({
     flex: 0.8,
   },
   priceCell: {
-    flex: 1,
+    flex: 1.2,
   },
   discountCell: {
     flex: 0.6,
   },
   totalCell: {
-    flex: 1.4,
+    flex: 1.9,
   },
   actionCell: {
-    flex: 0.4,
+    flex: 0.5,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -160,6 +156,56 @@ const createStyles = (colors, isDarkMode) => StyleSheet.create({
     paddingHorizontal: 10,
     marginHorizontal: 10,
     fontSize: 16,
+  },
+
+
+
+  container: {
+    flex: 1,
+    backgroundColor: isDarkMode ? '#2d2d2d' : '#ffffff',
+  },
+  actionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 10,
+    backgroundColor: isDarkMode ? '#3a3a3a' : '#f9f9f9',
+  },
+  actionButton: {
+    flex: 1,
+    marginHorizontal: 5,
+  },
+  input: {
+    marginVertical: 10,
+    backgroundColor: isDarkMode ? '#3a3a3a' : '#ffffff',
+  },
+  headerIcon: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  errorText: {
+    color: '#FF0000',
+    fontSize: 12,
+  },
+  snackbar: {
+    position: 'absolute',
+    bottom: 50,
+    left: 0,
+    right: 0,
+  },
+  successSnackbar: {
+    backgroundColor: '#4CAF50',
+  },
+  errorSnackbar: {
+    backgroundColor: '#F44336',
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginVertical: 10,
+  },
+  tableWrapper: {
+    borderRadius: 5,
+    overflow: 'hidden',
   },
 });
 

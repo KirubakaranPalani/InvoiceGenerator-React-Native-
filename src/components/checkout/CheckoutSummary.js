@@ -2,50 +2,47 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet} from 'react-native';
 import { spacing, typography, borderRadius, elevation, lightColors, darkColors } from '../../styles/ProductsStyles';
 
-const CheckoutSummary = ({ 
-  checkoutItems,
+const CheckoutSummary = ({
   totalProducts, 
   totalQuantity, 
   totalPrice, 
   customerName,
-  setCustomerName,
   handleGeneratePDF,
   isDarkMode,
-  finalPriceInWords
 }) => {
   const styles = getSummaryStyles(isDarkMode);
   return (
-    <>
     <View style={styles.summary}>
       <View style={styles.summaryContent}>
         <View style={styles.summaryLeft}>
-          <Text style={styles.summaryText}>Total Products :     <Text style= {styles.summaryBoldText}>{totalProducts}</Text></Text>
-          <Text style={styles.summaryText}>Total Quantity  :     <Text style= {styles.summaryBoldText}>{totalQuantity}</Text></Text>
-          <Text style={styles.summaryText}>Total Price        :     <Text style= {styles.summaryBoldText}>₹{totalPrice.toFixed(2)}</Text></Text>
+          <Text style={styles.summaryText}>Total Products :  <Text style= {styles.summaryBoldText}>{totalProducts}</Text></Text>
+          <Text style={styles.summaryText}>Total Quantity  :  <Text style= {styles.summaryBoldText}>{totalQuantity}</Text></Text>
+          <Text style={styles.summaryText}>Total Price        :  <Text style= {styles.summaryBoldText}>₹{totalPrice.toFixed(2)}</Text></Text>
         </View>
         <View style={styles.summaryRight}>
         {customerName && <Text style={styles.customerText}>Customer Name</Text>}
         {customerName &&  <Text style={styles.customerInput}>{customerName}</Text>}
         </View>
       </View>
-      <Text style={styles.summaryText}>Price(In words) :    <Text style= {styles.summaryBoldText}>{finalPriceInWords}</Text></Text>
       <TouchableOpacity style={styles.generateButton} onPress={handleGeneratePDF}>
         <Text style={styles.generateButtonText}>Generate Invoice</Text>
       </TouchableOpacity>
     </View>
-    </>
   );
 };
 const createStyles = (colors, isDarkMode) => StyleSheet.create({
   summary: {
-    top: 15,
-    width:'100%',
     backgroundColor: colors.surface,
     paddingLeft:15,
     paddingRight:15,
     borderRadius: borderRadius.md,
     paddingBlock:5,
     ...elevation.large,
+    paddingVertical: spacing.sm,
+    backgroundColor: colors.surface,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    marginBottom:60,
   },
   summaryContent: {
     flexDirection: 'row',

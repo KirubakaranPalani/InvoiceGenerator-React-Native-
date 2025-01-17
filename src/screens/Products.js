@@ -30,7 +30,8 @@ const Products = () => {
   const { products, fetchProducts } = useProductContext();
 
   const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase())
+    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.id.toString().startsWith(searchTerm)
   );
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
@@ -212,6 +213,8 @@ const Products = () => {
   return (
     <SafeAreaView style={styles.container}>
       <HeaderComponent title="Products" />
+
+      {/* Action buttons */}
       <View style={styles.actionsRow}>
         <ImportButton
           onImport={processImportedData}
@@ -230,6 +233,8 @@ const Products = () => {
           <Text style={styles.buttonText}>Delete All</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Filter input box */}
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
@@ -254,6 +259,8 @@ const Products = () => {
           <Text style={styles.clearButtonText}>Clear</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Content within scroll view */}
       <ScrollView>
         <View style={[styles.grid, { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', padding: 5 }]}>
           {currentProducts.map((product) => (
@@ -268,6 +275,8 @@ const Products = () => {
           ))}
         </View>
       </ScrollView>
+
+      {/* Pagination */}
       {showPagination && (
         <View style={[styles.paginationContainer, { marginBottom: paginationMargin }]}>
           <TouchableOpacity onPress={handlePrevPage} disabled={currentPage === 1}>
