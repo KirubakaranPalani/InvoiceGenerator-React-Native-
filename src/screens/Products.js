@@ -279,12 +279,12 @@ const Products = () => {
       {/* Pagination */}
       {showPagination && (
         <View style={[styles.paginationContainer, { marginBottom: paginationMargin }]}>
-          <TouchableOpacity onPress={handlePrevPage} disabled={currentPage === 1}>
-            <MaterialIcons name="arrow-back" size={24} color={currentPage === 1 ? styles.disabled : styles.primary} />
+            <TouchableOpacity onPress={handlePrevPage} disabled={currentPage === 1} style= {styles.paginationButton}>
+            <MaterialIcons name="arrow-back" size={24} color={currentPage === 1 ? isDarkMode ? '#404040' : '#e0e0e0': isDarkMode ? '#ffffff' : '#000000'} />
           </TouchableOpacity>
           <Text style={styles.paginationText}>{`Page ${currentPage} of ${Math.ceil(filteredProducts.length / productsPerPage)} (Total: ${filteredProducts.length})`}</Text>
-          <TouchableOpacity onPress={handleNextPage} disabled={currentPage === Math.ceil(filteredProducts.length / productsPerPage)}>
-            <MaterialIcons name="arrow-forward" size={24} color={currentPage === Math.ceil(filteredProducts.length / productsPerPage) ? styles.disabled : styles.primary} />
+          <TouchableOpacity onPress={handleNextPage} disabled={currentPage === Math.ceil(filteredProducts.length / productsPerPage)} style= {styles.paginationButton}>
+            <MaterialIcons name="arrow-forward" size={24} color={currentPage === Math.ceil(filteredProducts.length / productsPerPage) ? isDarkMode ? '#404040' : '#e0e0e0': isDarkMode ? '#ffffff' : '#000000'} />
           </TouchableOpacity>
         </View>
       )}

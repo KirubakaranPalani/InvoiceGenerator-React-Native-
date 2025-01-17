@@ -26,6 +26,9 @@ export const lightColors = {
   error: '#e74c3c',          // Red
   tableHeader: '#E3F2FD',     // Very Light Blue
   tableHeaderText: '#1976D2', // Darker Blue
+
+  //Pagination colors
+  arrowButton: '#A0AFB7',
 };
 
 export const darkColors = {
@@ -72,6 +75,9 @@ export const darkColors = {
   formBackground: '#1e1e1e',    // Base form background
   formSectionBg: '#262626',     // Slightly lighter for sections
   formInputBg: '#2d2d2d',       // Even lighter for inputs
+
+   //Pagination colors
+   arrowButton: '#1565C0',
 };
 
 export const spacing = {
@@ -218,17 +224,24 @@ const createStyles = (colors) => StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: spacing.sm,
+    paddingVertical: spacing.xs,
     backgroundColor: colors.surface,
     borderTopWidth: 1,
     borderTopColor: colors.border,
   },
   paginationButton: {
-    marginHorizontal: spacing.md,
+    paddingLeft:45,
+    paddingRight:45,
+    backgroundColor: colors.arrowButton,
+    paddingVertical: 6,
+    marginBottom:2,
+    borderRadius: 500,
   },
   paginationText: {
     fontSize: typography.regular,
     color: colors.text,
+    paddingRight:10, 
+    paddingLeft:10,
   },
   searchContainer: {
     flexDirection: 'row',
