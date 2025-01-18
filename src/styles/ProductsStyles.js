@@ -27,8 +27,6 @@ export const lightColors = {
   tableHeader: '#E3F2FD',     // Very Light Blue
   tableHeaderText: '#1976D2', // Darker Blue
 
-  //Pagination colors
-  arrowButton: '#A0AFB7',
 };
 
 export const darkColors = {
@@ -76,8 +74,6 @@ export const darkColors = {
   formSectionBg: '#262626',     // Slightly lighter for sections
   formInputBg: '#2d2d2d',       // Even lighter for inputs
 
-   //Pagination colors
-   arrowButton: '#1565C0',
 };
 
 export const spacing = {
@@ -230,45 +226,55 @@ const createStyles = (colors) => StyleSheet.create({
     borderTopColor: colors.border,
   },
   paginationButton: {
-    paddingLeft:45,
-    paddingRight:45,
-    backgroundColor: colors.arrowButton,
-    paddingVertical: 6,
-    marginBottom:2,
-    borderRadius: 500,
+    paddingLeft: '10%',
+    paddingRight: '10%',
+    paddingVertical: 4,
+    marginBottom: 2,
+    borderRadius: 20,
+    backgroundColor: colors.surface,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 3,
+    overflow: 'hidden',
   },
   paginationText: {
     fontSize: typography.regular,
     color: colors.text,
-    paddingRight:10, 
-    paddingLeft:10,
+    paddingRight: 10,
+    paddingLeft: 10,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginVertical: spacing.xs,
-    paddingRight:7,
+    paddingRight: 7,
   },
   clearButton: {
     backgroundColor: colors.importButton,
     borderRadius: 10,
     padding: 12,
   },
-  
+
   clearButtonText: {
     color: colors.buttonText,
     fontSize: typography.small,
   },
   searchInput: {
-  flex: 1,
-  height: 40,
-  borderColor: colors.border,
-  borderWidth: 1,
-  borderRadius: 5,
-  paddingHorizontal: 10,
-  marginRight: spacing.xs,
-  marginLeft: spacing.sm,
-},
+    flex: 1,
+    height: 40,
+    borderColor: colors.border,
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginRight: spacing.xs,
+    marginLeft: spacing.sm,
+  },
+  box: {
+
+  },
 });
 
 export const getProductsStyles = (isDarkMode) => {

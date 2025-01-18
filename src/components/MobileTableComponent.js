@@ -3,7 +3,7 @@ import {
   View,
   Text,
   StyleSheet,
-  FlatList,
+  ScrollView,
   TouchableOpacity,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -63,12 +63,13 @@ const MobileTableComponent = ({ data, onEdit, onDelete, showEditButton = true })
         <Text style={[styles.headerCell, styles.categoryCell]}>Category</Text>
         <Text style={[styles.headerCell, styles.actionCell]}>Actions</Text>
       </View>
-      <FlatList
-        data={data}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={styles.listContent}
-      />
+      <ScrollView contentContainerStyle={styles.listContent}>
+        {data.map((item, index) => (
+          <View key={item.id.toString()}>
+            {renderItem({ item, index })}
+          </View>
+        ))}
+      </ScrollView>
     </View>
   );
 };
@@ -99,8 +100,7 @@ const makeStyles = (theme) => StyleSheet.create({
     alignItems: 'center',
     backgroundColor: theme.colors.surface,
     paddingVertical: theme.spacing.md,
-    paddingHorizontal: theme.spacing.sm,
-    marginHorizontal: theme.spacing.sm,
+    marginHorizontal: theme.spacing.xs,
     marginBottom: theme.spacing.xs,
     borderRadius: theme.borderRadius.md,
     elevation: 2,

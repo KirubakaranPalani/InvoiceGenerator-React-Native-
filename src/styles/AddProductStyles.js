@@ -6,61 +6,48 @@ const createStyles = (colors) => StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
-  headerContainer: {
-    backgroundColor: colors.surface,
-    paddingTop: Platform.OS === 'android' ? 25 : 0,
-    paddingHorizontal: spacing.lg,
-    paddingBottom: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    ...elevation.small,
-  },
-  titleRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.md,
-    paddingVertical: spacing.sm,
-  },
-  headerTitle: {
-    fontSize: typography.xlarge,
-    color: colors.text,
-    fontWeight: 'bold',
-  },
   contentContainer: {
-    flex: 1,
+    padding: spacing.md,
     paddingHorizontal: spacing.md,
     paddingTop: spacing.xs,
-  },
-  formSection: {
-    flex: 1,
-    // marginTop: 340,
-    // marginBottom: spacing.md,
-    width: '100%',
-    maxHeight:'42%',
-    flexBasis:0.1,
-    // height: Platform.OS === 'ios' ? '42%' : '54%',
   },
   formContainer: {
     borderRadius: borderRadius.md,
     backgroundColor: colors.surface,
     ...elevation.medium,
     width: '100%',
-    height: '100%',
+    marginBottom: spacing.md,
   },
   formInner: {
     padding: 10,
-    minHeight: '100%',
+    // minHeight: '100%',
   },
   formFields: {
     gap: 2,
     flex: 1,
   },
   input: {
-    backgroundColor: colors.inputBackground,
     marginBottom: 2,
     height: 42,
-    color: colors.text,
+  },
+  quantityInput: {
+    flex: 0.8,
+    marginRight: 20,
+  },
+  radioGroup: {
+    flex: 1, 
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+  },
+  radioRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 2.5,
+  },
+  radioLabel: {
+    marginLeft: 4,
+    marginRight: 20,
   },
   pickerContainer: {
     marginBottom: spacing.xs,
@@ -81,6 +68,7 @@ const createStyles = (colors) => StyleSheet.create({
   picker: {
     color: colors.text,
     height: 52,
+    borderRadius: borderRadius.sm,
   },
   pickerError: {
     borderColor: colors.error,
@@ -88,49 +76,35 @@ const createStyles = (colors) => StyleSheet.create({
   errorText: {
     color: colors.error,
     fontSize: typography.small,
-    marginTop: 2,
-  },
-  buttonGroup: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: spacing.md,
     marginTop: spacing.xs,
-    paddingHorizontal: spacing.xs,
   },
-  button: {
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.sm,
+  },
+  actionButton: {
     flex: 1,
-    height: 38,
-  },
-  tableSection: {
-    flex: 0.8,
-    flexBasis:0.1,
-    marginTop: spacing.sm,
-    borderRadius: borderRadius.md,
+    marginHorizontal: spacing.sm,
   },
   tableContainer: {
-    borderRadius: borderRadius.md,
-    backgroundColor: colors.surface,
-    ...elevation.medium,
-    paddingBottom: spacing.sm,
+    marginBottom:60,
   },
-  tableWrapper: {
-    minHeight: 180,
-    maxHeight: 250,
-  },
-  sectionTitle: {
+  tableTitle: {
     fontSize: typography.medium,
-    color: colors.text,
     fontWeight: 'bold',
+    color: colors.text,
     marginBottom: spacing.sm,
-    paddingHorizontal: spacing.md,
-    paddingTop: spacing.sm,
+  },
+  saveButton: {
+    marginTop: spacing.sm,
   },
   snackbar: {
-    position: 'relative',
-    top: -710,
-    zIndex:9999,
     margin: spacing.md,
+    position: 'relative',
+    zIndex:9999,
     borderRadius: borderRadius.sm,
+    opacity:0.9,
   },
   successSnackbar: {
     backgroundColor: colors.success,
@@ -138,81 +112,30 @@ const createStyles = (colors) => StyleSheet.create({
   errorSnackbar: {
     backgroundColor: colors.error,
   },
-  submitButton: {
-    marginHorizontal: spacing.md,
-  },
-  cameraContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: colors.background,
-    zIndex: 2000,
-  },
-  cameraHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingTop: Platform.OS === 'ios' ? 50 : 20,
-    paddingBottom: spacing.sm,
+  tempMinimize: {
     backgroundColor: colors.surface,
-    ...elevation.small,
-  },
-  camera: {
+    paddingLeft: 15,
+    paddingRight: 15,
+    borderRadius: borderRadius.md,
+    paddingBlock: 5,
+    ...elevation.large,
+    paddingVertical: spacing.sm,
+    backgroundColor: colors.surface,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+},
+tempMinimizeText: {
+    textAlign:'center',
+    fontSize: typography.medium,
+    color: colors.text,
+    marginBottom: spacing.xs,
+},
+tempMinimizeBoldText: {
     flex: 1,
-  },
-  cameraButtonsContainer: {
-    position: 'absolute',
-    bottom: spacing.xl,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    paddingHorizontal: spacing.lg,
-  },
-  themeButtonContainer: {
-    minWidth: 50,
-    minHeight: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: spacing.md,
-    borderRadius: borderRadius.round,
-    backgroundColor: Platform.select({
-      ios: colors.surface,
-      android: colors.background,
-    }),
-    ...elevation.small,
-    shadowColor: colors.shadow,
-  },
-
-  quantityRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 5,
-  },
-  quantityInput: {
-    flex: 0.8,
-    marginRight: 22,
-  },
-  radioGroup: {
-    flex: 1, // Ensures it has enough space in the row
-    flexDirection: 'row', // Align radio buttons horizontally
-    alignItems: 'center',
-    justifyContent: 'flex-start', // Ensures items align to the left
-  },
-  radioRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 5, // Add space between each radio button group
-  },
-  radioLabel: {
-    marginLeft: 4,
-    marginRight: 23,
-    
-  },
+    color: colors.text,
+    fontWeight: 'bold',
+    fontSize: typography.large
+},
 });
 
 const getAddProductStyles = (isDarkMode) => {

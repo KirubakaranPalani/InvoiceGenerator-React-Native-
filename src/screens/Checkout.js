@@ -432,16 +432,11 @@ const Checkout = () => {
       {/* Checkout Summary */}
       {keyboardOn ? (
         <MinimizedCheckoutSummary
-          checkoutItems={checkoutItems}
           totalProducts={totalProducts}
           totalQuantity={totalQuantity}
           totalPrice={totalPrice}
-          customerName={customerName}
-          setCustomerName={setCustomerName}
-          handleGeneratePDF={handleGeneratePDF}
           styles={styles}
           isDarkMode={isDarkMode}
-          finalPriceInWords={finalPriceInWords}
         />
       ) : (
         <CheckoutSummary

@@ -1,18 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   ScrollView,
   TouchableOpacity,
+  Keyboard,
+  SafeAreaView,
+  TouchableWithoutFeedback
 } from 'react-native';
 import {
   TextInput,
   Button,
   Text,
-  Surface,
   Portal,
   Snackbar,
-  MD3LightTheme,
-  Provider as PaperProvider,
   RadioButton,
 } from 'react-native-paper';
 import { Picker } from '@react-native-picker/picker';
@@ -22,24 +22,29 @@ import HeaderComponent from '../components/HeaderComponent';
 import { useTheme } from '../context/ThemeContext';
 import getAddProductStyles from '../styles/AddProductStyles';
 import { useProductContext } from '../context/ProductContext';
-import Container from '../components/Container';
 import { useToast } from '../context/ToastContext';
 
 const AddProduct = () => {
+  const [keyboardOn, setKeyboardOn] = useState(false);
+  const keyboardDismissRef = useRef(false);
   const db = useSQLiteContext();
   const { isDarkMode } = useTheme();
   const styles = getAddProductStyles(isDarkMode);
   const { showToast } = useToast();
 
-  const customTheme = {
-    ...MD3LightTheme,
-    colors: {
-      ...MD3LightTheme.colors,
-      primary: '#2196F3',
-      onPrimaryContainer: '#2196F3',
-      outline: '#2196F3',
-    },
-  };
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
+      setKeyboardOn(true); // Set margin to 0 when keyboard is open
+    });
+    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
+      setKeyboardOn(false); // Restore margin when keyboard is closed
+    });
+
+    return () => {
+      keyboardDidHideListener.remove();
+      keyboardDidShowListener.remove();
+    };
+  }, []);
 
   const [formData, setFormData] = useState({
     id: '',
@@ -137,6 +142,9 @@ const AddProduct = () => {
       console.error('Error adding temporary product:', error);
       showSnackbar('Failed to validate product', 'error');
     }
+    if (keyboardDismissRef.current) {
+      Keyboard.dismiss();
+    }
   };
 
   const handleRemoveTemporaryProduct = (id) => {
@@ -178,260 +186,272 @@ const AddProduct = () => {
   const { addProduct } = useProductContext();
 
   return (
-    <>
-      <HeaderComponent title="Add Product" />
-      <Portal>
-        <Snackbar
-          visible={snackbar.visible}
-          onDismiss={hideSnackbar}
-          duration={3000}
-          style={[
-            styles.snackbar,
-            snackbar.type === 'success' ? styles.successSnackbar : styles.errorSnackbar
-          ]}
-        >
-          {snackbar.message}
-        </Snackbar>
-      </Portal>
-      <Container style={styles.contentContainer}>
-        <PaperProvider theme={customTheme}>
-          <View style={styles.formSection}>
-            <Surface style={styles.formContainer}>
-              <ScrollView
-                alwaysBounceVertical
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ flexGrow: 1 }}
-              >
-                <View style={styles.formInner}>
-                  <View style={styles.formFields}>
-                    <TextInput
-                      mode="outlined"
-                      label="Product ID"
-                      value={formData.id}
-                      onChangeText={(text) => handleInputChange('id', text)}
-                      keyboardType="numeric"
-                      error={!!errors.id}
-                      style={styles.input}
-                      dense
-                      theme={{
-                        colors: {
-                          text: isDarkMode ? '#ffffff' : '#000000',
-                          placeholder: isDarkMode ? '#ffffff' : '#757575',
-                          onSurfaceVariant: isDarkMode ? '#ffffff' : '#757575',
-                          primary: '#2196F3',
-                          error: isDarkMode ? '#ffffff' : '#FF0000',
-                          background: isDarkMode ? '#2d2d2d' : '#ffffff',
-                          surface: isDarkMode ? '#2d2d2d' : '#ffffff',
-                          onSurface: isDarkMode ? '#ffffff' : '#000000',
-                        }
-                      }}
-                      activeOutlineColor="#2196F3"
-                    />
-                    {errors.id && <Text style={styles.errorText}>{errors.id}</Text>}
+    <SafeAreaView style={styles.container}>
+            {/* Header */}
+            <HeaderComponent title="Add Product" />
 
-                    <TextInput
-                      mode="outlined"
-                      label="Product Name"
-                      value={formData.name}
-                      onChangeText={(text) => handleInputChange('name', text)}
-                      error={!!errors.name}
-                      style={styles.input}
-                      dense
-                      theme={{
-                        colors: {
-                          text: isDarkMode ? '#ffffff' : '#000000',
-                          placeholder: isDarkMode ? '#ffffff' : '#757575',
-                          onSurfaceVariant: isDarkMode ? '#ffffff' : '#757575',
-                          primary: '#2196F3',
-                          error: isDarkMode ? '#ffffff' : '#FF0000',
-                          background: isDarkMode ? '#2d2d2d' : '#ffffff',
-                          surface: isDarkMode ? '#2d2d2d' : '#ffffff',
-                          onSurface: isDarkMode ? '#ffffff' : '#000000',
-                        }
-                      }}
-                      activeOutlineColor="#2196F3"
-                    />
-                    {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
-
-                    <TextInput
-                      mode="outlined"
-                      label="Price"
-                      value={formData.price}
-                      onChangeText={(text) => handleInputChange('price', text)}
-                      keyboardType="numeric"
-                      error={!!errors.price}
-                      style={styles.input}
-                      left={<TextInput.Affix text="₹" textStyle={{ color: isDarkMode ? '#ffffff' : '#000000' }} />}
-                      dense
-                      theme={{
-                        colors: {
-                          text: isDarkMode ? '#ffffff' : '#000000',
-                          placeholder: isDarkMode ? '#ffffff' : '#757575',
-                          onSurfaceVariant: isDarkMode ? '#ffffff' : '#757575',
-                          primary: '#2196F3',
-                          error: isDarkMode ? '#ffffff' : '#FF0000',
-                          background: isDarkMode ? '#2d2d2d' : '#ffffff',
-                          surface: isDarkMode ? '#2d2d2d' : '#ffffff',
-                          onSurface: isDarkMode ? '#ffffff' : '#000000',
-                        }
-                      }}
-                      activeOutlineColor="#2196F3"
-                    />
-                    {errors.price && <Text style={styles.errorText}>{errors.price}</Text>}
-                    <View style={styles.quantityRow}>
-                      <TextInput
-                        mode="outlined"
-                        label="Quantity"
-                        value={formData.quantity}
-                        onChangeText={(text) => handleInputChange('quantity', text)}
-                        keyboardType="numeric"
-                        error={!!errors.quantity}
-                        style={styles.quantityInput}
-                        dense
-                        theme={{
-                          colors: {
-                            text: isDarkMode ? '#ffffff' : '#000000',
-                            placeholder: isDarkMode ? '#ffffff' : '#757575',
-                            onSurfaceVariant: isDarkMode ? '#ffffff' : '#757575',
-                            primary: '#2196F3',
-                            error: isDarkMode ? '#ffffff' : '#FF0000',
-                            background: isDarkMode ? '#2d2d2d' : '#ffffff',
-                            surface: isDarkMode ? '#2d2d2d' : '#ffffff',
-                            onSurface: isDarkMode ? '#ffffff' : '#000000',
-                          }
-                        }}
-                        activeOutlineColor="#2196F3"
-                      />
-                      <View style={styles.radioGroup}>
-                        <RadioButton.Group
-                          onValueChange={(value) => handleInputChange('measurementTypeId', value)}
-                          value={formData.measurementTypeId}
-                        >
-                          <View style={styles.radioRow}>
-                            {/* Unit Radio Button */}
-                            <TouchableOpacity
-                              style={styles.radioRow} // Ensures alignment remains correct
-                              onPress={() => handleInputChange('measurementTypeId', 1)} // Selects Unit
-                            >
-                              <RadioButton value={1} />
-                              <Text style={[styles.radioLabel, { color: isDarkMode ? '#ffffff' : '#000000' }]}>Unit</Text>
-                            </TouchableOpacity>
-
-                            {/* Gram Radio Button */}
-                            <TouchableOpacity
-                              style={styles.radioRow} // Ensures alignment remains correct
-                              onPress={() => handleInputChange('measurementTypeId', 2)} // Selects Gram
-                            >
-                              <RadioButton value={2} />
-                              <Text style={[styles.radioLabel, { color: isDarkMode ? '#ffffff' : '#000000' }]}>KiloGram</Text>
-
-                            </TouchableOpacity>
-                          </View>
-                        </RadioButton.Group>
-                      </View>
-                    </View>
-
-
-                    {errors.quantity && <Text style={styles.errorText}>{errors.quantity}</Text>}
-                    <TextInput
-                      mode="outlined"
-                      label="Discount"
-                      value={formData.discount}
-                      onChangeText={(text) => handleInputChange('discount', text)}
-                      keyboardType="numeric"
-                      style={styles.input}
-                      right={<TextInput.Affix text="%" textStyle={{ color: isDarkMode ? '#ffffff' : '#000000' }} />}
-                      dense
-                      theme={{
-                        colors: {
-                          text: isDarkMode ? '#ffffff' : '#000000',
-                          placeholder: isDarkMode ? '#ffffff' : '#757575',
-                          onSurfaceVariant: isDarkMode ? '#ffffff' : '#757575',
-                          primary: '#2196F3',
-                          error: isDarkMode ? '#ffffff' : '#FF0000',
-                          background: isDarkMode ? '#2d2d2d' : '#ffffff',
-                          surface: isDarkMode ? '#2d2d2d' : '#ffffff',
-                          onSurface: isDarkMode ? '#ffffff' : '#000000',
-                        }
-                      }}
-                      activeOutlineColor="#2196F3"
-                    />
-
-                    <View style={styles.pickerContainer}>
-                      <Text style={styles.pickerLabel}>Category</Text>
-                      <View style={styles.pickerWrapper}>
-                        <Picker
-                          selectedValue={formData.category}
-                          onValueChange={(itemValue) => handleInputChange('category', itemValue)}
-                          style={[
-                            styles.picker,
-                            errors.category && styles.pickerError
-                          ]}
-                        >
-                          <Picker.Item label="Select Category" value="" />
-                          <Picker.Item label="Electrical" value="Electrical" />
-                          <Picker.Item label="Plumbing" value="Plumbing" />
-                          <Picker.Item label="Tools" value="Tools" />
-                          <Picker.Item label="Others" value="Others" />
-                        </Picker>
-                      </View>
-                      {errors.category && <Text style={styles.errorText}>{errors.category}</Text>}
-                    </View>
-
-                    <View style={styles.buttonGroup}>
-                      <Button
-                        mode="contained"
-                        onPress={handleAddTemporaryProduct}
-                        style={[styles.button, { backgroundColor: '#2196F3' }]}
-                      >
-                        Add to List
-                      </Button>
-                      <Button
-                        mode="outlined"
-                        onPress={handleClearForm}
-                        style={styles.button}
-                        textColor="#2196F3"
-                      >
-                        Clear
-                      </Button>
-                    </View>
-                  </View>
-                </View>
-              </ScrollView>
-            </Surface>
-          </View>
-
-          {temporaryProducts.length > 0 && (
-            <View style={styles.tableSection}>
-              <Surface style={styles.tableContainer}>
-                <Text style={styles.sectionTitle}>
-                  Temporary Product List ({temporaryProducts.length})
-                </Text>
-                <View style={styles.tableWrapper}>
-                  <MobileTableComponent
-                    data={temporaryProducts.map((item) => ({
-                      ...item,
-                      price: parseFloat(item.price).toFixed(2),
-                      discount: item.discount ? `${item.discount}` : '0',
-                      measurementType: item.measurementTypeId === 2 ? 'gram' : 'unit',
-                    }))}
-                    showEditButton={false}
-                    onDelete={handleRemoveTemporaryProduct}
-                  />
-                </View>
-                <Button
-                  mode="contained"
-                  onPress={handleAddAllProducts}
-                  style={[styles.submitButton, { backgroundColor: '#2196F3' }]}
+            {/* Snackbar */}
+            <Portal>
+                <Snackbar
+                    visible={snackbar.visible}
+                    onDismiss={hideSnackbar}
+                    duration={500}
+                    style={[
+                        styles.snackbar,
+                        {top: keyboardOn ? -510 : -750},
+                        snackbar.type === 'success' ? styles.successSnackbar : styles.errorSnackbar
+                    ]}
                 >
-                  Save All Products
-                </Button>
-              </Surface>
+                    {snackbar.message}
+                </Snackbar>
+            </Portal>
+
+            {/* Form Section */}
+            <ScrollView
+                contentContainerStyle={styles.contentContainer}
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+            >
+                <View style={styles.formContainer}>
+                    <View style={styles.formInner}>
+                        <View style={styles.formFields}>
+                            {/* Product ID */}
+                            <TextInput
+                                mode="outlined"
+                                label="Product ID"
+                                value={formData.id}
+                                onChangeText={(text) => handleInputChange('id', text)}
+                                keyboardType="numeric"
+                                error={!!errors.id}
+                                style={styles.input}
+                                dense
+                                theme={{
+                                    colors: {
+                                        text: isDarkMode ? '#ffffff' : '#000000',
+                                        placeholder: isDarkMode ? '#ffffff' : '#757575',
+                                        onSurfaceVariant: isDarkMode ? '#ffffff' : '#757575',
+                                        primary: '#2196F3',
+                                        error: isDarkMode ? '#ffffff' : '#FF0000',
+                                        background: isDarkMode ? '#2d2d2d' : '#ffffff',
+                                        surface: isDarkMode ? '#2d2d2d' : '#ffffff',
+                                        onSurface: isDarkMode ? '#ffffff' : '#000000',
+                                    }
+                                }}
+                                activeOutlineColor="#2196F3"
+                            />
+                            {errors.id && <Text style={styles.errorText}>{errors.id}</Text>}
+
+                            {/* Product Name */}
+                            <TextInput
+                                mode="outlined"
+                                label="Product Name"
+                                value={formData.name}
+                                onChangeText={(text) => handleInputChange('name', text)}
+                                error={!!errors.name}
+                                style={styles.input}
+                                dense
+                                theme={{
+                                    colors: {
+                                        text: isDarkMode ? '#ffffff' : '#000000',
+                                        placeholder: isDarkMode ? '#ffffff' : '#757575',
+                                        onSurfaceVariant: isDarkMode ? '#ffffff' : '#757575',
+                                        primary: '#2196F3',
+                                        error: isDarkMode ? '#ffffff' : '#FF0000',
+                                        background: isDarkMode ? '#2d2d2d' : '#ffffff',
+                                        surface: isDarkMode ? '#2d2d2d' : '#ffffff',
+                                        onSurface: isDarkMode ? '#ffffff' : '#000000',
+                                    }
+                                }}
+                                activeOutlineColor="#2196F3"
+                            />
+                            {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
+
+                            {/* Price */}
+                            <TextInput
+                                mode="outlined"
+                                label="Price"
+                                value={formData.price}
+                                onChangeText={(text) => handleInputChange('price', text)}
+                                keyboardType="numeric"
+                                left={<TextInput.Affix text="₹" textStyle={{ color: isDarkMode ? '#ffffff' : '#000000' }} />}
+                                error={!!errors.price}
+                                style={styles.input}
+                                dense
+                                theme={{
+                                    colors: {
+                                        text: isDarkMode ? '#ffffff' : '#000000',
+                                        placeholder: isDarkMode ? '#ffffff' : '#757575',
+                                        onSurfaceVariant: isDarkMode ? '#ffffff' : '#757575',
+                                        primary: isDarkMode ? '#ffffff' : '#757575',
+                                        error: isDarkMode ? '#ffffff' : '#FF0000',
+                                        background: isDarkMode ? '#2d2d2d' : '#ffffff',
+                                        surface: isDarkMode ? '#2d2d2d' : '#ffffff',
+                                        onSurface: isDarkMode ? '#ffffff' : '#000000',
+                                    }
+                                }}
+                                activeOutlineColor="#2196F3"
+                            />
+                            {errors.price && <Text style={styles.errorText}>{errors.price}</Text>}
+
+                            {/* Quantity and Measurement Type */}
+                            <View style={styles.row}>
+                                <TextInput
+                                    mode="outlined"
+                                    label="Quantity"
+                                    value={formData.quantity}
+                                    onChangeText={(text) => handleInputChange('quantity', text)}
+                                    keyboardType="numeric"
+                                    error={!!errors.quantity}
+                                    style={styles.quantityInput}
+                                    dense
+                                    theme={{
+                                        colors: {
+                                            text: isDarkMode ? '#ffffff' : '#000000',
+                                            placeholder: isDarkMode ? '#ffffff' : '#757575',
+                                            onSurfaceVariant: isDarkMode ? '#ffffff' : '#757575',
+                                            primary: '#2196F3',
+                                            error: isDarkMode ? '#ffffff' : '#FF0000',
+                                            background: isDarkMode ? '#2d2d2d' : '#ffffff',
+                                            surface: isDarkMode ? '#2d2d2d' : '#ffffff',
+                                            onSurface: isDarkMode ? '#ffffff' : '#000000',
+                                        }
+                                    }}
+                                    activeOutlineColor="#2196F3"
+                                />
+                                <View style={styles.radioGroup}>
+                                    <RadioButton.Group
+                                        onValueChange={(value) => handleInputChange('measurementTypeId', value)}
+                                        value={formData.measurementTypeId}
+                                    >
+                                        <View style={styles.radioRow}>
+                                            {/* Unit Radio Button */}
+                                            <TouchableOpacity
+                                                style={styles.radioRow} // Ensures alignment remains correct
+                                                onPress={() => handleInputChange('measurementTypeId', 1)} // Selects Unit
+                                            >
+                                                <RadioButton value={1} />
+                                                <Text style={[styles.radioLabel, { color: isDarkMode ? '#ffffff' : '#000000' }]}>Unit</Text>
+                                            </TouchableOpacity>
+
+                                            {/* Gram Radio Button */}
+                                            <TouchableOpacity
+                                                style={styles.radioRow} // Ensures alignment remains correct
+                                                onPress={() => handleInputChange('measurementTypeId', 2)} // Selects Gram
+                                            >
+                                                <RadioButton value={2} />
+                                                <Text style={[styles.radioLabel, { color: isDarkMode ? '#ffffff' : '#000000' }]}>KiloGram</Text>
+
+                                            </TouchableOpacity>
+                                        </View>
+                                    </RadioButton.Group>
+                                </View>
+                            </View>
+                            {errors.quantity && <Text style={styles.errorText}>{errors.quantity}</Text>}
+
+                            {/* Discount */}
+                            <TextInput
+                                mode="outlined"
+                                label="Discount"
+                                value={formData.discount}
+                                onChangeText={(text) => handleInputChange('discount', text)}
+                                keyboardType="numeric"
+                                right={<TextInput.Affix text="%" />}
+                                style={styles.input}
+                                dense
+                                theme={{
+                                    colors: {
+                                        text: isDarkMode ? '#ffffff' : '#000000',
+                                        placeholder: isDarkMode ? '#ffffff' : '#757575',
+                                        onSurfaceVariant: isDarkMode ? '#ffffff' : '#757575',
+                                        primary: '#2196F3',
+                                        error: isDarkMode ? '#ffffff' : '#FF0000',
+                                        background: isDarkMode ? '#2d2d2d' : '#ffffff',
+                                        surface: isDarkMode ? '#2d2d2d' : '#ffffff',
+                                        onSurface: isDarkMode ? '#ffffff' : '#000000',
+                                    }
+                                }}
+                                activeOutlineColor="#2196F3"
+                            />
+
+                            {/* Category Picker */}
+                            <View style={styles.pickerContainer}>
+                                <Text style={styles.pickerLabel}>Category</Text>
+                                <View style={styles.pickerWrapper}>
+                                    <Picker
+                                        selectedValue={formData.category}
+                                        onValueChange={(itemValue) => handleInputChange('category', itemValue)}
+                                        style={[
+                                            styles.picker,
+                                            errors.category && styles.pickerError
+                                        ]}
+                                    >
+                                        <Picker.Item label="Select Category" value="" />
+                                        <Picker.Item label="Electrical" value="Electrical" />
+                                        <Picker.Item label="Plumbing" value="Plumbing" />
+                                        <Picker.Item label="Tools" value="Tools" />
+                                        <Picker.Item label="Others" value="Others" />
+                                    </Picker>
+                                </View>
+                                {errors.category && <Text style={styles.errorText}>{errors.category}</Text>}
+                            </View>
+                            {/* Form Actions */}
+                            <TouchableWithoutFeedback>
+                                <View style={styles.row}>
+                                    <Button
+                                        mode="contained"
+                                        onPress={() => {
+                                          handleAddTemporaryProduct();
+                                          Keyboard.dismiss();
+                                        }}
+                                        style={styles.actionButton}
+                                    >
+                                        Add to List
+                                    </Button>
+                                    <Button
+                                        mode="outlined"
+                                        onPress={handleClearForm}
+                                        style={styles.actionButton}
+                                    >
+                                        Clear
+                                    </Button>
+                                </View>
+                            </TouchableWithoutFeedback>
+                        </View>
+                    </View>
+                </View>
+
+                {/* Temporary Product List */}
+                {temporaryProducts.length > 0 && (
+                    <View style={styles.tableContainer}>
+                        <Text style={styles.tableTitle}>
+                            Temporary Product List ({temporaryProducts.length})
+                        </Text>
+                        <MobileTableComponent
+                            data={temporaryProducts.map((item) => ({
+                                ...item,
+                                price: parseFloat(item.price).toFixed(2),
+                                discount: item.discount ? `${item.discount}` : '0',
+                                measurementType: item.measurementTypeId === 2 ? 'gram' : 'unit',
+                            }))}
+                            showEditButton={false}
+                            onDelete={handleRemoveTemporaryProduct}
+                        />
+                        <Button
+                            mode="contained"
+                            onPress={handleAddAllProducts}
+                            style={styles.saveButton}
+                        >
+                            Save All Products
+                        </Button>
+                    </View>
+                )}
+            </ScrollView>
+            <View style={styles.tempMinimize}>
+                <Text style={styles.tempMinimizeText}>
+                    No of Temporary Products: <Text style={styles.tempMinimizeBoldText}>{temporaryProducts.length}</Text>
+                </Text>
             </View>
-          )}
-        </PaperProvider>
-      </Container >
-    </>
+        </SafeAreaView>
   );
 };
 
