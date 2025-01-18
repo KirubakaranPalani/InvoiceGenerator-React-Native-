@@ -10,6 +10,7 @@ const lightTheme = {
     primary: '#2196F3',
     onPrimaryContainer: '#2196F3',
     outline: '#2196F3',
+    secondaryContainer: 'rgb(237, 221, 246)',
   },
 };
 
@@ -20,6 +21,7 @@ const darkTheme = {
     primary: '#1976D2',
     onPrimaryContainer: '#1976D2',
     outline: '#1976D2',
+    secondaryContainer: 'rgb(77, 67, 87)',
   },
 };
 

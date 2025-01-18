@@ -2,7 +2,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 import React, { useRef, useState, useEffect } from 'react';
 import { View, StyleSheet, Keyboard, FlatList, TouchableOpacity, Text, TouchableWithoutFeedback } from 'react-native';
 import { TextInput } from 'react-native-paper';
-import {lightColors, darkColors } from '../../styles/ProductsStyles';
+import { lightColors, darkColors } from '../../styles/ProductsStyles';
 import { useFocusEffect } from '@react-navigation/native';
 import { useProductContext } from '../../context/ProductContext';
 
@@ -29,9 +29,9 @@ const ProductSearch = ({
     }
   };
 
-    // const fetchProducts = async () => {
-      useEffect(() => {
-        async function fetchProducts() {
+  // const fetchProducts = async () => {
+  useEffect(() => {
+    async function fetchProducts() {
       try {
         const results = await db.getAllAsync(`SELECT * FROM products;`);
         setProductSuggestions(results);
@@ -85,8 +85,8 @@ const ProductSearch = ({
   //     product.id.toString().startsWith(searchInput);
   // });
 
-   // Filter products based on the search query
-   const filteredProducts = products.filter((product) =>
+  // Filter products based on the search query
+  const filteredProducts = products.filter((product) =>
     product.name.toLowerCase().includes(searchInput.toLowerCase()) ||
     product.id.toString().startsWith(searchInput)
   );
@@ -155,18 +155,29 @@ const ProductSearch = ({
               styles.dropdownContainer,
               { backgroundColor: isDarkMode ? '#2d2d2d' : '#ffffff' }
             ]}>
-              <FlatList
-                data={filteredProducts}
-                renderItem={renderItem}
-                keyExtractor={(item) => item.id.toString()}
-                showsVerticalScrollIndicator={false}
-                keyboardShouldPersistTaps="handled"
-                maxHeight={124}
-              />
+              {filteredProducts.length > 0 ? (
+                <FlatList
+                  data={filteredProducts}
+                  renderItem={renderItem}
+                  keyExtractor={(item) => item.id.toString()}
+                  showsVerticalScrollIndicator={false}
+                  keyboardShouldPersistTaps="handled"
+                  maxHeight={124}
+                />
+              ) : (
+                <View style={styles.noProductContainer}>
+                  <Text style={[
+                    styles.noProductText,
+                    { color: isDarkMode ? '#ffffff' : '#757575', }
+                  ]}>
+                    No product found
+                  </Text>
+                </View>
+              )
+              }
             </View>
           </TouchableWithoutFeedback>
         )}
-      {/* </View> */}
       </>
     </TouchableWithoutFeedback>
   );
@@ -175,7 +186,7 @@ const ProductSearch = ({
 const createStyles = (colors, isDarkMode) => StyleSheet.create({
 
   input: {
-    height: 40,
+    height: 35,
     borderColor: '#bbb',
     borderRadius: 5,
     paddingHorizontal: 10,
@@ -185,7 +196,7 @@ const createStyles = (colors, isDarkMode) => StyleSheet.create({
   dropdownContainer: {
     // change position to fix the dropdown container here
     position: 'absolute',
-    top: 110,
+    top: 105,
     left: 10,
     right: 10,
     borderWidth: 1,
@@ -193,7 +204,7 @@ const createStyles = (colors, isDarkMode) => StyleSheet.create({
     borderRadius: 5,
     zIndex: 1000,
     elevation: 5,
-    maxHeight:400,
+    maxHeight: 400,
   },
   dropdownItem: {
     padding: 10,
@@ -202,6 +213,15 @@ const createStyles = (colors, isDarkMode) => StyleSheet.create({
   },
   dropdownItemText: {
     fontSize: 16,
+  },
+  noProductContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 30,
+  },
+  noProductText: {
+    fontSize: 14,
+    fontWeight: '400',
   },
 })
 const getProductSearchStyles = (isDarkMode) => {

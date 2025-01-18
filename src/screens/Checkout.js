@@ -114,6 +114,15 @@ const Checkout = () => {
     const discountAmount = (discount / 100) * totalBeforeDiscount;
     return totalBeforeDiscount - discountAmount;
   };
+  const calculateDiscountedPrice = (item) => {
+    const totalPrice = calculateTotalPrice(item);
+    const isGramBased = item.measurementType === 'gram';
+    const quantity = isGramBased ? item.quantity / 1000 : item.quantity;
+    if (quantity === 0) {
+      return 0;
+    }
+    return totalPrice / quantity;
+  }
 
   // Delete item from checkout
   const handleDeleteItem = (index) => {
@@ -264,7 +273,7 @@ const Checkout = () => {
                                 <td style="text-align: center;">${index + 1}</td>
                                 <td>${item.name}</td>
                                 <td style="text-align: center;">${item.quantity}</td>
-                                <td>₹${item.price.toFixed(2)}</td>
+                                <td>₹${calculateDiscountedPrice(item).toFixed(2)}</td>
                                 <td>₹${item.totalPrice.toFixed(2)}</td>
                             </tr>
                         `).join('')}
@@ -296,12 +305,6 @@ const Checkout = () => {
       console.error('Failed to generate PDF:', error);
       Alert.alert('Error', 'Failed to generate or preview PDF.');
     }
-  };
-
-
-  // Dismiss dropdown when clicking outside the input or dropdown
-  const handleDismissDropdown = () => {
-    Keyboard.dismiss();
   };
 
   // Function to convert numbers to words
@@ -376,10 +379,7 @@ const Checkout = () => {
               />
             ) : null
           }
-          style={[
-            styles.input,
-            { backgroundColor: isDarkMode ? '#2d2d2d' : '#ffffff' }
-          ]}
+          style={{ marginVertical: 2, backgroundColor: isDarkMode ? '#2d2d2d' : '#ffffff', height: 30, }}
           theme={{
             colors: {
               text: isDarkMode ? '#ffffff' : '#000000',
@@ -408,7 +408,7 @@ const Checkout = () => {
           Price ₹
         </Text>
         <Text style={[styles.tableCell, styles.cellBase, styles.discountCell]} numberOfLines={1}>
-          Disc
+          Disc%
         </Text>
         <Text style={[styles.tableCell, styles.cellBase, styles.totalCell]} numberOfLines={1}>
           Total

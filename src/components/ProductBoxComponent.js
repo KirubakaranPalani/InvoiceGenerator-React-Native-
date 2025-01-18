@@ -22,7 +22,7 @@ const ProductBoxComponent = ({ product, onEdit, onDelete }) => {
   return (
     <View style={styles.box}>
       <Text style={styles.productId}>#{product.id}</Text>
-      <Text style={styles.quantity}>({product.quantity})</Text>
+      <Text style={styles.quantity}>{product.quantity}{product.measurementTypeId === 1 ? '(N)': '(Kg)'}</Text>
       <Image source={getImageForCategory(product.category)} style={styles.backgroundImage} />
       <View style={styles.infoContainer}>
         <Text style={styles.name}>{product.name}</Text>
@@ -58,7 +58,7 @@ const makeStyles = (theme) => StyleSheet.create({
     borderRadius: theme.shape ? theme.shape.borderRadius : 10,
     alignItems: 'center',
     justifyContent: 'flex-start',
-    shadowColor: '#000',
+    shadowColor: theme.colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
@@ -110,12 +110,12 @@ const makeStyles = (theme) => StyleSheet.create({
     borderRadius: theme.shape ? theme.shape.borderRadius : 10,
     alignItems: 'center',
     padding: theme.spacing.sm,
-    marginRight: theme.spacing.sm,
+    marginRight: theme.spacing.xs,
     shadowColor: theme.colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    elevation: 9,
+    elevation: 2,
   },
   discountBox: {
     flex: 1,
@@ -128,7 +128,7 @@ const makeStyles = (theme) => StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    elevation: 5,
+    elevation: 2,
   },
   boxContent: {
     fontSize: theme.typography.medium,

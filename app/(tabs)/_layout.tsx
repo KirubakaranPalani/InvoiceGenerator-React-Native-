@@ -66,6 +66,14 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <Ionicons name="add-circle" size={24} color={color} />,
         }}
       />
+      <Tabs.Screen
+        name="checkout-sample"
+        options={{
+          title: 'Checkout sample',
+          headerShown: false,
+          tabBarIcon: ({ color }) => <Ionicons name="add-circle" size={24} color={color} />,
+        }}
+      />
     </Tabs>
   );
 }

@@ -66,6 +66,10 @@ const createStyles = (colors, isDarkMode) => StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     zIndex: 1,
+    borderRadius: borderRadius.md,
+    paddingBlock:5,
+    ...elevation.large,
+    borderTopColor: colors.border,
   },
   tableCell: {
     color: isDarkMode ? '#fff' : '#000',
@@ -77,8 +81,8 @@ const createStyles = (colors, isDarkMode) => StyleSheet.create({
     flex: 1,
   },
   cellBase: {
-    paddingHorizontal: 1,
-    padding: 3
+    paddingHorizontal: 0,
+    padding: 2
   },
   numericCell: {
     textAlign: 'center',
@@ -114,7 +118,7 @@ const createStyles = (colors, isDarkMode) => StyleSheet.create({
     flex: 1.2,
   },
   discountCell: {
-    flex: 0.6,
+    flex: 0.9,
   },
   totalCell: {
     flex: 1.9,
@@ -146,7 +150,6 @@ const createStyles = (colors, isDarkMode) => StyleSheet.create({
     marginLeft:'25%',
     marginRight:'25%',
     
-    // alignContent:'center',
   },
   input: {
     height: 40,
@@ -175,7 +178,7 @@ const createStyles = (colors, isDarkMode) => StyleSheet.create({
     marginHorizontal: 5,
   },
   input: {
-    marginVertical: 10,
+    marginVertical: 2,
     backgroundColor: isDarkMode ? '#3a3a3a' : '#ffffff',
   },
   headerIcon: {

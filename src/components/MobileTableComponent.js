@@ -18,11 +18,11 @@ const MobileTableComponent = ({ data, onEdit, onDelete, showEditButton = true })
   const styles = makeStyles(theme);
 
   const renderItem = ({ item, index }) => (
-    <View style={styles.row}>
+    <View style={[styles.row, {backgroundColor: item.measurementType === 'gram' ? theme.colors.secondaryContainer : theme.colors.surface }]}>
       <Text style={[styles.cell, styles.serialCell]}>{index + 1}</Text>
       <View style={[styles.cell, styles.productCell]}>
-        <Text style={styles.productId} numberOfLines={1}>{item.id}</Text>
-        <Text style={styles.productName} numberOfLines={1}>{item.name}</Text>
+        <Text style={styles.productId} numberOfLines={2}>{item.id}</Text>
+        <Text style={styles.productName} numberOfLines={4}>{item.name}</Text>
       </View>
       {item.measurementType === 'gram' ? (
         <Text style={[styles.cell, styles.qtyCell]}>{item.quantity} Kg</Text>) :
@@ -98,7 +98,6 @@ const makeStyles = (theme) => StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme.colors.surface,
     paddingVertical: theme.spacing.md,
     marginHorizontal: theme.spacing.xs,
     marginBottom: theme.spacing.xs,

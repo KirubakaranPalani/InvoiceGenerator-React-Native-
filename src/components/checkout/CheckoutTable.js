@@ -2,6 +2,9 @@ import React from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
+import { spacing, typography, borderRadius, elevation, lightColors, darkColors } from '../../styles/ProductsStyles';
+
+import { lightTheme, darkTheme } from '../../styles/theme';
 
 const CheckoutTable = ({
   checkoutItems,
@@ -11,10 +14,13 @@ const CheckoutTable = ({
 }) => {
   const { isDarkMode } = useTheme();
 
+  const colors = isDarkMode ? darkColors : lightColors;
+  const theme = isDarkMode ? darkTheme : lightTheme;
+
   return (
     <ScrollView>
       {checkoutItems.map((item, index) => (
-        <View key={item.id.toString()} style={styles.tableRow}>
+        <View key={item.id.toString()} style={[styles.tableRow, {backgroundColor: item.measurementTypeId === 1 ? colors.surface : theme.colors.secondaryContainer}]}>
           <Text style={[styles.tableCell, styles.cellBase, styles.serialCell]} numberOfLines={1}>
             {index + 1}
           </Text>

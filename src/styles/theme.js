@@ -24,6 +24,7 @@ export const lightTheme = {
     tableRow: '#ffffff',      // White
     tableRowAlt: '#f8f9fa',   // Very light grey
     shadow: '#000000',        // Black
+    secondaryContainer: 'rgb(237, 221, 246)',
   },
   spacing: {
     xs: 4,
@@ -74,6 +75,7 @@ export const darkTheme = {
     tableRow: '#1e1e1e',     // Dark grey
     tableRowAlt: '#262626',   // Slightly lighter dark
     shadow: '#ffffff',       // Black
+    secondaryContainer: 'rgb(77, 67, 87)',
   },
   spacing: {
     xs: 4,
