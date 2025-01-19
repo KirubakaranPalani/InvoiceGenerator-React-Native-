@@ -8,7 +8,7 @@
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "assetBundlePatterns": [
-      "assets/**/*"
+      "assets/logo/*"
     ],
     "androidStatusBar": {
       "backgroundColor": "#ffffff", // Match splash.backgroundColor

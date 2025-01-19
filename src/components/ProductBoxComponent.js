@@ -12,11 +12,11 @@ const ProductBoxComponent = ({ product, onEdit, onDelete }) => {
   const getImageForCategory = (category) => {
     // Map category to image source
     const categoryImages = {
-      Electrical: require('../../assets/logo/SmLogo.png'),
-      Plumbing: require('../../assets/logo/SmLogo.png'),
+      Electrical: require('../../assets/logo/electricalLogo.png'),
+      Plumbing: require('../../assets/logo/Plumbing.png'),
       Tools: require('../../assets/logo/SmLogo.png'),
     };
-    return categoryImages[category] || require('../../assets/images/adaptive-icon.png');
+    return categoryImages[category] || require('../../assets/logo/SmLogo.png');
   };
 
   return (
@@ -69,6 +69,7 @@ const makeStyles = (theme) => StyleSheet.create({
     position: 'absolute',
     top: 10,
     left: 10,
+    zIndex:10,
     color: theme.colors.text,
     fontSize: theme.typography.small,
     fontWeight: 'bold',
@@ -79,6 +80,7 @@ const makeStyles = (theme) => StyleSheet.create({
     position: 'absolute',
     top: 10,
     right: 10,
+    zIndex:10,
     color: theme.colors.text,
     fontSize: theme.typography.small,
     fontWeight: 'bold',
@@ -88,8 +90,8 @@ const makeStyles = (theme) => StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: 120,
-    width: '100%',
+    height: 97,
+    width: '110%',
     opacity: 0.6,
     resizeMode: 'cover',
   },
@@ -138,7 +140,6 @@ const makeStyles = (theme) => StyleSheet.create({
   boxTitle: {
     fontSize: theme.typography.xs,
     color: theme.colors.textSecondary,
-    marginTop: theme.spacing.xs,
   },
   name: {
     fontSize: theme.typography.medium,

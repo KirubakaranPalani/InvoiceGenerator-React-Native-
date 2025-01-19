@@ -8,6 +8,8 @@ import { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import { Asset } from 'expo-asset';
+import { Animated } from 'react-native';
+import WelcomeScreen from '../src/components/WelcomeScreen'; // Ensure this path is correct
 
 const customTheme = {
   ...MD3LightTheme,
@@ -20,7 +22,14 @@ const customTheme = {
 };
 
 const preloadAssets = async () => {
-  const assets = [require('../assets/logo/SmLogo.png')]; // Add other assets here if needed
+  const assets = [
+    require('../assets/logo/SmLogo.png'),
+    require('../assets/logo/electricalLogo.png'),
+    require('../assets/logo/Plumbing.png'),
+    require('../assets/logo/SMWelcomeLogo.png'),
+    // Add more assets here as needed
+  ];
+
   const cacheAssets = assets.map((asset) => Asset.fromModule(asset).downloadAsync());
   await Promise.all(cacheAssets);
 };
@@ -28,6 +37,8 @@ const preloadAssets = async () => {
 const AppContent = () => {
   const db = useSQLiteContext();
   const [isAppReady, setIsAppReady] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(true);
+  const opacity = new Animated.Value(0); // For fade-in animation
 
   useEffect(() => {
     const initializeDatabase = async () => {
@@ -83,11 +94,34 @@ const AppContent = () => {
     initializeApp();
   }, [db]);
 
+  // Trigger fade-in animation after the welcome screen
+  useEffect(() => {
+    if (!showWelcome) {
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 900,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [showWelcome]);
+
+  const handleAnimationEnd = () => {
+    setShowWelcome(false);
+  };
+
   if (!isAppReady) {
-    return null;
+    return null; // Prevent rendering until assets and DB are ready
   }
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+  if (showWelcome) {
+    return <WelcomeScreen onAnimationEnd={handleAnimationEnd} />;
+  }
+
+  return (
+    <Animated.View style={{ flex: 1, opacity }}>
+      <Stack screenOptions={{ headerShown: false }} />
+    </Animated.View>
+  );
 };
 
 

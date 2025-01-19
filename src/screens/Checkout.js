@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { TextInput } from 'react-native-paper';
 import * as Print from 'expo-print';
+import * as FileSystem from 'expo-file-system';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 import HeaderComponent from '../components/HeaderComponent';
@@ -30,7 +31,6 @@ const Checkout = () => {
   const [customerName, setCustomerName] = useState('');
   const logoURI = Asset.fromModule(SmLogo).uri;
   const [keyboardOn, setKeyboardOn] = useState(false);
-  // const showMinimizedSummary = keyboardOn;
   useEffect(() => {
     calculateSummary();
   }, [checkoutItems]);
@@ -132,6 +132,21 @@ const Checkout = () => {
 
   // Generate and print PDF invoice
   const handleGeneratePDF = async () => {
+  try {
+
+    const asset = Asset.fromModule(SmLogo);
+    await asset.downloadAsync(); // Ensure the asset is downloaded
+
+   const assetUri = asset.localUri;
+    if (!assetUri) {
+      throw new Error('Asset localUri is not available');
+    }
+    const base64Image = await FileSystem.readAsStringAsync(assetUri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+  const logoBase64 = `data:image/png;base64,${base64Image}`;
+
+
     const invoiceHTML = `
     <!DOCTYPE html>
     <html lang="en">
@@ -244,7 +259,7 @@ const Checkout = () => {
             <div class="invoice-title">Invoice</div>
             <div class="invoice-header">
                 <div class="shop-details">
-                    <img src="${logoURI}" alt="Logo"/>
+                    <img src="${logoBase64}" alt="Logo"/>
                       <div class = "shop-details-text"><strong> SM Electricals & Plumbings </strong> </div>
                       <div class = "shop-details-text"> No.56A, Arni Rd, Virupatchipuram,</div> 
                       <div class = "shop-details-text"> RV Nagar, Vellore, Tamil Nadu 632002</div>
@@ -305,6 +320,9 @@ const Checkout = () => {
       console.error('Failed to generate PDF:', error);
       Alert.alert('Error', 'Failed to generate or preview PDF.');
     }
+  } catch (error) {
+    console.error('Error generating PDF:', error);
+  }
   };
 
   // Function to convert numbers to words
