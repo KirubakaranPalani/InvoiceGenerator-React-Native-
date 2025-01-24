@@ -1,129 +1,76 @@
-import React, { useState, useRef, useEffect } from 'react';
-import {
-  View,
-  ScrollView,
-  TouchableOpacity,
-  Keyboard,
-  SafeAreaView,
-  TouchableWithoutFeedback
-} from 'react-native';
-import {
-  TextInput,
-  Button,
-  Text,
-  Portal,
-  Snackbar,
-  RadioButton,
-} from 'react-native-paper';
-import { Picker } from '@react-native-picker/picker';
+import React, { useState } from 'react';
+import { View, ScrollView, TouchableOpacity, Keyboard, SafeAreaView, TouchableWithoutFeedback } from 'react-native';
+import { TextInput, Button, Text, RadioButton } from 'react-native-paper';
 import { useSQLiteContext } from 'expo-sqlite';
-import MobileTableComponent from '../components/MobileTableComponent';
-import HeaderComponent from '../components/HeaderComponent';
+import MobileTableComponent from '../common/MobileTableComponent';
+import HeaderComponent from '../common/HeaderComponent';
 import { useTheme } from '../context/ThemeContext';
 import getAddProductStyles from '../styles/AddProductStyles';
 import { useProductContext } from '../context/ProductContext';
 import { useToast } from '../context/ToastContext';
 
 const AddProduct = () => {
-  const [keyboardOn, setKeyboardOn] = useState(false);
-  const keyboardDismissRef = useRef(false);
-  const db = useSQLiteContext();
   const { isDarkMode } = useTheme();
-  const styles = getAddProductStyles(isDarkMode);
   const { showToast } = useToast();
+  const { addProduct } = useProductContext();
+  const db = useSQLiteContext();
+  const styles = getAddProductStyles(isDarkMode);
 
-  useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
-      setKeyboardOn(true); // Set margin to 0 when keyboard is open
-    });
-    const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
-      setKeyboardOn(false); // Restore margin when keyboard is closed
-    });
-
-    return () => {
-      keyboardDidHideListener.remove();
-      keyboardDidShowListener.remove();
-    };
-  }, []);
-
+  // State Management
   const [formData, setFormData] = useState({
     id: '',
     name: '',
     price: '',
     quantity: '',
     discount: '',
-    category: '',
-    measurementTypeId: 1, // Default to "unit"
+    category: 1,
+    measurementTypeId: 1,
+    subProductCategory: '',
   });
   const [temporaryProducts, setTemporaryProducts] = useState([]);
   const [errors, setErrors] = useState({});
-  const [snackbar, setSnackbar] = useState({
-    visible: false,
-    message: '',
-    type: 'info' // 'info', 'success', or 'error'
-  });
 
-  const showSnackbar = (message, type = 'info') => {
-    setSnackbar({
-      visible: true,
-      message,
-      type
-    });
-  };
-
-  const hideSnackbar = () => {
-    setSnackbar(prev => ({ ...prev, visible: false }));
-  };
-
+  // Input Change Handler
   const handleInputChange = (field, value) => {
-    setFormData({
-      ...formData,
-      [field]: value,
-    });
+    setFormData((prevData) => ({ ...prevData, [field]: value }));
     if (errors[field]) {
-      setErrors({
-        ...errors,
-        [field]: null,
-      });
+      setErrors((prevErrors) => ({ ...prevErrors, [field]: null }));
     }
   };
 
+  // Form Validation
   const validateForm = () => {
     const newErrors = {};
-    const { id, name, price, quantity, category } = formData;
+    const { id, name, price, quantity, subProductCategory } = formData;
 
     if (!id) newErrors.id = 'Product ID is required';
     if (!name) newErrors.name = 'Product name is required';
-    if (!price) newErrors.price = 'Price is required';
-    else if (isNaN(price) || parseFloat(price) <= 0) newErrors.price = 'Invalid price';
-    if (!quantity) newErrors.quantity = 'Quantity is required';
-    else if (isNaN(quantity) || parseInt(quantity) <= 0) newErrors.quantity = 'Invalid quantity';
-    if (!category) newErrors.category = 'Category is required';
+    if (!price || isNaN(price) || parseFloat(price) < 0) newErrors.price = 'Invalid price';
+    if (!quantity || isNaN(quantity) || parseInt(quantity) < 0) newErrors.quantity = 'Invalid quantity';
+    if (!subProductCategory) newErrors.subProductCategory = 'Sub-Product Category is required';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+  // Add Temporary Product
   const handleAddTemporaryProduct = async () => {
     if (!validateForm()) {
-      showSnackbar('Please fill all required fields correctly', 'error');
+      showToast('Please fill all required fields correctly', 'error');
       return;
     }
 
     try {
       if (temporaryProducts.some((product) => product.id === formData.id)) {
         setErrors({ id: 'Product with this ID already exists in the list' });
-        showSnackbar('Product with this ID already exists in the list', 'error');
+        showToast('Product with this ID already exists in the list', 'error');
         return;
       }
 
-      const existingProduct = await db.getFirstAsync(
-        'SELECT * FROM products WHERE id = ?',
-        [formData.id]
-      );
+      const existingProduct = await db.getFirstAsync('SELECT * FROM products WHERE id = ?', [formData.id]);
       if (existingProduct) {
         setErrors({ id: 'Product with this ID already exists in the database' });
-        showSnackbar('Product with this ID already exists in the database', 'error');
+        showToast('Product with this ID already exists in the database', 'error');
         return;
       }
 
@@ -131,46 +78,47 @@ const AddProduct = () => {
         ...prevProducts,
         {
           ...formData,
-          price: Number(formData.price),
-          quantity: Number(formData.quantity),
-          discount: Number(formData.discount) || 0,
+          price: parseFloat(formData.price),
+          quantity: parseInt(formData.quantity),
+          discount: parseFloat(formData.discount) || 0,
+          measurementType: formData.measurementTypeId === 1 ? 'Unit' : 'Kilogram',
+          category: formData.category === 1
+            ? 'Electricals'
+            : formData.category === 2
+              ? 'Plumbing'
+              : 'Others',
+
         },
       ]);
-      setFormData({ ...formData, measurementTypeId: 1 });
-      showSnackbar('Product added to temporary list', 'success');
+      setFormData({ ...formData, category: 1, measurementTypeId: 1 });
+      showToast('Product added to temporary list', 'success');
     } catch (error) {
-      console.error('Error adding temporary product:', error);
-      showSnackbar('Failed to validate product', 'error');
-    }
-    if (keyboardDismissRef.current) {
-      Keyboard.dismiss();
+      showToast('Failed to validate product', 'error');
     }
   };
 
+  //Remove Temporary Product
   const handleRemoveTemporaryProduct = (id) => {
-    setTemporaryProducts((prevProducts) =>
-      prevProducts.filter((product) => product.id !== id)
-    );
+    setTemporaryProducts((prevProducts) => prevProducts.filter((product) => product.id !== id));
     showToast('Product removed successfully', 'delete');
   };
 
+  // Add All Products
   const handleAddAllProducts = async () => {
-    if (temporaryProducts.length === 0) {
-      showSnackbar('No products to add', 'error');
-      return;
-    }
     try {
+      console.log(temporaryProducts);
       for (const product of temporaryProducts) {
-        await addProduct(product); // Use context to add product
+        await addProduct(product);
       }
-      showSnackbar('All products added successfully', 'success');
+      showToast('All products added successfully', 'success');
       setTemporaryProducts([]);
     } catch (error) {
       console.error('Error adding products:', error);
-      showSnackbar('Failed to save products', 'error');
+      showToast('Failed to save products', 'error');
     }
   };
 
+  // Clear Form
   const handleClearForm = () => {
     setFormData({
       id: '',
@@ -178,280 +126,193 @@ const AddProduct = () => {
       price: '',
       quantity: '',
       discount: '',
-      category: '',
+      category: 1,
       measurementTypeId: 1,
+      subProductCategory: '',
     });
     setErrors({});
   };
-  const { addProduct } = useProductContext();
+
+  // Theme Colors
+  const themeColors = {
+    text: isDarkMode ? '#ffffff' : '#000000',
+    placeholder: isDarkMode ? '#ffffff' : '#757575',
+    onSurfaceVariant: isDarkMode ? '#ffffff' : '#757575',
+    primary: '#2196F3',
+    error: isDarkMode ? '#ffffff' : '#FF0000',
+    background: isDarkMode ? '#2d2d2d' : '#ffffff',
+    surface: isDarkMode ? '#2d2d2d' : '#ffffff',
+    onSurface: isDarkMode ? '#ffffff' : '#000000',
+  };
+
+  // Render Functions
+  const renderTextInput = (label, value, onChangeText, error, keyboardType, additionalProps = {}) => (
+    <TextInput
+      mode="outlined"
+      label={label}
+      value={value}
+      onChangeText={onChangeText}
+      error={!!error}
+      keyboardType={keyboardType}
+      style={styles.input}
+      dense
+      theme={{ colors: themeColors }}
+      activeOutlineColor="#2196F3"
+      {...additionalProps}
+    />
+  );
+
+  const renderRadioButtonGroup = (label, groupValue, options, onValueChange) => (
+    <View style={styles.radioGroup}>
+      <RadioButton.Group value={groupValue} onValueChange={onValueChange}>
+        <View style={styles.radioRow}>
+          {options.map(({ value, text }) => (
+            <TouchableOpacity
+              key={value}
+              style={styles.radioRow}
+              onPress={() => onValueChange(value)}
+            >
+              <RadioButton value={value} />
+              <Text style={[styles.radioLabel, { color: themeColors.text }]}>{text}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </RadioButton.Group>
+    </View>
+  );
 
   return (
     <SafeAreaView style={styles.container}>
-            {/* Header */}
-            <HeaderComponent title="Add Product" />
+      <HeaderComponent title="Add Product" />
+      <ScrollView
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.formContainer}>
+          <View style={styles.formInner}>
+            <View style={styles.formFields}>
+              {/* Product ID */}
+              {renderTextInput('Product ID', formData.id, (text) => handleInputChange('id', text), errors.id, 'numeric')}
+              {errors.id && <Text style={styles.errorText}>{errors.id}</Text>}
 
-            {/* Snackbar */}
-            <Portal>
-                <Snackbar
-                    visible={snackbar.visible}
-                    onDismiss={hideSnackbar}
-                    duration={500}
-                    style={[
-                        styles.snackbar,
-                        {top: keyboardOn ? -510 : -750},
-                        snackbar.type === 'success' ? styles.successSnackbar : styles.errorSnackbar
-                    ]}
-                >
-                    {snackbar.message}
-                </Snackbar>
-            </Portal>
+              {/* Product Name */}
+              {renderTextInput('Product Name', formData.name, (text) => handleInputChange('name', text), errors.name)}
+              {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
 
-            {/* Form Section */}
-            <ScrollView
-                contentContainerStyle={styles.contentContainer}
-                showsVerticalScrollIndicator={false}
-                keyboardShouldPersistTaps="handled"
-            >
-                <View style={styles.formContainer}>
-                    <View style={styles.formInner}>
-                        <View style={styles.formFields}>
-                            {/* Product ID */}
-                            <TextInput
-                                mode="outlined"
-                                label="Product ID"
-                                value={formData.id}
-                                onChangeText={(text) => handleInputChange('id', text)}
-                                keyboardType="numeric"
-                                error={!!errors.id}
-                                style={styles.input}
-                                dense
-                                theme={{
-                                    colors: {
-                                        text: isDarkMode ? '#ffffff' : '#000000',
-                                        placeholder: isDarkMode ? '#ffffff' : '#757575',
-                                        onSurfaceVariant: isDarkMode ? '#ffffff' : '#757575',
-                                        primary: '#2196F3',
-                                        error: isDarkMode ? '#ffffff' : '#FF0000',
-                                        background: isDarkMode ? '#2d2d2d' : '#ffffff',
-                                        surface: isDarkMode ? '#2d2d2d' : '#ffffff',
-                                        onSurface: isDarkMode ? '#ffffff' : '#000000',
-                                    }
-                                }}
-                                activeOutlineColor="#2196F3"
-                            />
-                            {errors.id && <Text style={styles.errorText}>{errors.id}</Text>}
+              {/* Price */}
+              {renderTextInput(
+                'Price',
+                formData.price,
+                (text) => handleInputChange('price', text),
+                errors.price,
+                'numeric',
+                {
+                  left: <TextInput.Affix text="₹" textStyle={{ color: themeColors.text }} />,
+                }
+              )}
+              {errors.price && <Text style={styles.errorText}>{errors.price}</Text>}
 
-                            {/* Product Name */}
-                            <TextInput
-                                mode="outlined"
-                                label="Product Name"
-                                value={formData.name}
-                                onChangeText={(text) => handleInputChange('name', text)}
-                                error={!!errors.name}
-                                style={styles.input}
-                                dense
-                                theme={{
-                                    colors: {
-                                        text: isDarkMode ? '#ffffff' : '#000000',
-                                        placeholder: isDarkMode ? '#ffffff' : '#757575',
-                                        onSurfaceVariant: isDarkMode ? '#ffffff' : '#757575',
-                                        primary: '#2196F3',
-                                        error: isDarkMode ? '#ffffff' : '#FF0000',
-                                        background: isDarkMode ? '#2d2d2d' : '#ffffff',
-                                        surface: isDarkMode ? '#2d2d2d' : '#ffffff',
-                                        onSurface: isDarkMode ? '#ffffff' : '#000000',
-                                    }
-                                }}
-                                activeOutlineColor="#2196F3"
-                            />
-                            {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
-
-                            {/* Price */}
-                            <TextInput
-                                mode="outlined"
-                                label="Price"
-                                value={formData.price}
-                                onChangeText={(text) => handleInputChange('price', text)}
-                                keyboardType="numeric"
-                                left={<TextInput.Affix text="₹" textStyle={{ color: isDarkMode ? '#ffffff' : '#000000' }} />}
-                                error={!!errors.price}
-                                style={styles.input}
-                                dense
-                                theme={{
-                                    colors: {
-                                        text: isDarkMode ? '#ffffff' : '#000000',
-                                        placeholder: isDarkMode ? '#ffffff' : '#757575',
-                                        onSurfaceVariant: isDarkMode ? '#ffffff' : '#757575',
-                                        primary: isDarkMode ? '#ffffff' : '#757575',
-                                        error: isDarkMode ? '#ffffff' : '#FF0000',
-                                        background: isDarkMode ? '#2d2d2d' : '#ffffff',
-                                        surface: isDarkMode ? '#2d2d2d' : '#ffffff',
-                                        onSurface: isDarkMode ? '#ffffff' : '#000000',
-                                    }
-                                }}
-                                activeOutlineColor="#2196F3"
-                            />
-                            {errors.price && <Text style={styles.errorText}>{errors.price}</Text>}
-
-                            {/* Quantity and Measurement Type */}
-                            <View style={styles.row}>
-                                <TextInput
-                                    mode="outlined"
-                                    label="Quantity"
-                                    value={formData.quantity}
-                                    onChangeText={(text) => handleInputChange('quantity', text)}
-                                    keyboardType="numeric"
-                                    error={!!errors.quantity}
-                                    style={styles.quantityInput}
-                                    dense
-                                    theme={{
-                                        colors: {
-                                            text: isDarkMode ? '#ffffff' : '#000000',
-                                            placeholder: isDarkMode ? '#ffffff' : '#757575',
-                                            onSurfaceVariant: isDarkMode ? '#ffffff' : '#757575',
-                                            primary: '#2196F3',
-                                            error: isDarkMode ? '#ffffff' : '#FF0000',
-                                            background: isDarkMode ? '#2d2d2d' : '#ffffff',
-                                            surface: isDarkMode ? '#2d2d2d' : '#ffffff',
-                                            onSurface: isDarkMode ? '#ffffff' : '#000000',
-                                        }
-                                    }}
-                                    activeOutlineColor="#2196F3"
-                                />
-                                <View style={styles.radioGroup}>
-                                    <RadioButton.Group
-                                        onValueChange={(value) => handleInputChange('measurementTypeId', value)}
-                                        value={formData.measurementTypeId}
-                                    >
-                                        <View style={styles.radioRow}>
-                                            {/* Unit Radio Button */}
-                                            <TouchableOpacity
-                                                style={styles.radioRow} // Ensures alignment remains correct
-                                                onPress={() => handleInputChange('measurementTypeId', 1)} // Selects Unit
-                                            >
-                                                <RadioButton value={1} />
-                                                <Text style={[styles.radioLabel, { color: isDarkMode ? '#ffffff' : '#000000' }]}>Unit</Text>
-                                            </TouchableOpacity>
-
-                                            {/* Gram Radio Button */}
-                                            <TouchableOpacity
-                                                style={styles.radioRow} // Ensures alignment remains correct
-                                                onPress={() => handleInputChange('measurementTypeId', 2)} // Selects Gram
-                                            >
-                                                <RadioButton value={2} />
-                                                <Text style={[styles.radioLabel, { color: isDarkMode ? '#ffffff' : '#000000' }]}>KiloGram</Text>
-
-                                            </TouchableOpacity>
-                                        </View>
-                                    </RadioButton.Group>
-                                </View>
-                            </View>
-                            {errors.quantity && <Text style={styles.errorText}>{errors.quantity}</Text>}
-
-                            {/* Discount */}
-                            <TextInput
-                                mode="outlined"
-                                label="Discount"
-                                value={formData.discount}
-                                onChangeText={(text) => handleInputChange('discount', text)}
-                                keyboardType="numeric"
-                                right={<TextInput.Affix text="%" />}
-                                style={styles.input}
-                                dense
-                                theme={{
-                                    colors: {
-                                        text: isDarkMode ? '#ffffff' : '#000000',
-                                        placeholder: isDarkMode ? '#ffffff' : '#757575',
-                                        onSurfaceVariant: isDarkMode ? '#ffffff' : '#757575',
-                                        primary: '#2196F3',
-                                        error: isDarkMode ? '#ffffff' : '#FF0000',
-                                        background: isDarkMode ? '#2d2d2d' : '#ffffff',
-                                        surface: isDarkMode ? '#2d2d2d' : '#ffffff',
-                                        onSurface: isDarkMode ? '#ffffff' : '#000000',
-                                    }
-                                }}
-                                activeOutlineColor="#2196F3"
-                            />
-
-                            {/* Category Picker */}
-                            <View style={styles.pickerContainer}>
-                                <Text style={styles.pickerLabel}>Category</Text>
-                                <View style={styles.pickerWrapper}>
-                                    <Picker
-                                        selectedValue={formData.category}
-                                        onValueChange={(itemValue) => handleInputChange('category', itemValue)}
-                                        style={[
-                                            styles.picker,
-                                            errors.category && styles.pickerError
-                                        ]}
-                                    >
-                                        <Picker.Item label="Select Category" value="" />
-                                        <Picker.Item label="Electrical" value="Electrical" />
-                                        <Picker.Item label="Plumbing" value="Plumbing" />
-                                        <Picker.Item label="Tools" value="Tools" />
-                                        <Picker.Item label="Others" value="Others" />
-                                    </Picker>
-                                </View>
-                                {errors.category && <Text style={styles.errorText}>{errors.category}</Text>}
-                            </View>
-                            {/* Form Actions */}
-                            <TouchableWithoutFeedback>
-                                <View style={styles.row}>
-                                    <Button
-                                        mode="contained"
-                                        onPress={() => {
-                                          handleAddTemporaryProduct();
-                                          Keyboard.dismiss();
-                                        }}
-                                        style={styles.actionButton}
-                                    >
-                                        Add to List
-                                    </Button>
-                                    <Button
-                                        mode="outlined"
-                                        onPress={handleClearForm}
-                                        style={styles.actionButton}
-                                    >
-                                        Clear
-                                    </Button>
-                                </View>
-                            </TouchableWithoutFeedback>
-                        </View>
-                    </View>
-                </View>
-
-                {/* Temporary Product List */}
-                {temporaryProducts.length > 0 && (
-                    <View style={styles.tableContainer}>
-                        <Text style={styles.tableTitle}>
-                            Temporary Product List ({temporaryProducts.length})
-                        </Text>
-                        <MobileTableComponent
-                            data={temporaryProducts.map((item) => ({
-                                ...item,
-                                price: parseFloat(item.price).toFixed(2),
-                                discount: item.discount ? `${item.discount}` : '0',
-                                measurementType: item.measurementTypeId === 2 ? 'gram' : 'unit',
-                            }))}
-                            showEditButton={false}
-                            onDelete={handleRemoveTemporaryProduct}
-                        />
-                        <Button
-                            mode="contained"
-                            onPress={handleAddAllProducts}
-                            style={styles.saveButton}
-                        >
-                            Save All Products
-                        </Button>
-                    </View>
+              {/* Quantity and Measurement Type */}
+              <View style={styles.row}>
+                {renderTextInput(
+                  'Quantity',
+                  formData.quantity,
+                  (text) => handleInputChange('quantity', text),
+                  errors.quantity,
+                  'numeric',
+                  { style: styles.quantityInput }
                 )}
-            </ScrollView>
-            <View style={styles.tempMinimize}>
-                <Text style={styles.tempMinimizeText}>
-                    No of Temporary Products: <Text style={styles.tempMinimizeBoldText}>{temporaryProducts.length}</Text>
-                </Text>
+                {renderRadioButtonGroup('Measurement Type', formData.measurementTypeId, [
+                  { value: 1, text: 'Unit' },
+                  { value: 2, text: 'Kilogram' },
+                ], (value) => handleInputChange('measurementTypeId', value))}
+              </View>
+              {errors.quantity && <Text style={styles.errorText}>{errors.quantity}</Text>}
+
+              {/* Discount */}
+              {renderTextInput(
+                'Discount',
+                formData.discount,
+                (text) => handleInputChange('discount', text),
+                null,
+                'numeric',
+                { right: <TextInput.Affix text="%" /> }
+              )}
+
+              {/* Category */}
+              {renderRadioButtonGroup('Category', formData.category, [
+                { value: 1, text: 'Electricals' },
+                { value: 2, text: 'Plumbing' },
+                { value: 3, text: 'Others' },
+              ], (value) => handleInputChange('category', value))}
+
+              {/* Sub-Product Category */}
+              {renderTextInput(
+                'Sub-Product Category',
+                formData.subProductCategory,
+                (text) => handleInputChange('subProductCategory', text),
+                errors.subProductCategory
+              )}
+
+              {/* Form Actions */}
+              <TouchableWithoutFeedback>
+                <View style={styles.row}>
+                  <Button
+                    mode="contained"
+                    onPress={() => {
+                      handleAddTemporaryProduct();
+                      Keyboard.dismiss();
+                    }}
+                    style={styles.actionButton}
+                  >
+                    Add to List
+                  </Button>
+                  <Button
+                    mode="outlined"
+                    onPress={handleClearForm}
+                    style={styles.actionButton}
+                  >
+                    Clear
+                  </Button>
+                </View>
+              </TouchableWithoutFeedback>
             </View>
-        </SafeAreaView>
+          </View>
+        </View>
+
+        {/* Temporary Product List */}
+        {temporaryProducts.length > 0 && (
+          <View style={styles.tableContainer}>
+            <Text style={styles.tableTitle}>
+              Temporary Product List ({temporaryProducts.length})
+            </Text>
+            <MobileTableComponent
+              data={temporaryProducts.map((item) => ({
+                ...item,
+                price: parseFloat(item.price).toFixed(2),
+                discount: item.discount ? `${item.discount}` : '0',
+                measurementType: item.measurementTypeId === 1 ? 'Unit' : 'Kilogram',
+              }))}
+              showEditButton={false}
+              onDelete={handleRemoveTemporaryProduct}
+            />
+            <Button
+              mode="contained"
+              onPress={handleAddAllProducts}
+              style={styles.saveButton}
+            >
+              Save All Products
+            </Button>
+          </View>
+        )}
+      </ScrollView>
+      <View style={styles.tempMinimize}>
+        <Text style={styles.tempMinimizeText}>
+          No of Temporary Products: <Text style={styles.tempMinimizeBoldText}>{temporaryProducts.length}</Text>
+        </Text>
+      </View>
+    </SafeAreaView>
   );
 };
 

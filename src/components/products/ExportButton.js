@@ -36,6 +36,7 @@ const ExportButton = ({ data, style, textStyle }) => {
 
       // Clean up
       await FileSystem.deleteAsync(filePath);
+      showToast(`${data.length} products exported successfully.`);
     } catch (error) {
       Alert.alert('Error', 'Failed to export data. Please try again.');
     }

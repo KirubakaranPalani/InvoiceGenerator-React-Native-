@@ -1,4 +1,6 @@
-import { StyleSheet, Platform } from 'react-native';
+import { StyleSheet, Platform, Dimensions } from 'react-native';
+
+const { width, height } = Dimensions.get('window');
 
 export const lightColors = {
   background: '#ffffff',    // Pure white
@@ -26,7 +28,7 @@ export const lightColors = {
   error: '#e74c3c',          // Red
   tableHeader: '#E3F2FD',     // Very Light Blue
   tableHeaderText: '#1976D2', // Darker Blue
-
+  secondaryContainer: '#f1f3f5',
 };
 
 export const darkColors = {
@@ -73,23 +75,23 @@ export const darkColors = {
   formBackground: '#1e1e1e',    // Base form background
   formSectionBg: '#262626',     // Slightly lighter for sections
   formInputBg: '#2d2d2d',       // Even lighter for inputs
-
+  secondaryContainer: '#2c2c2c',
 };
 
 export const spacing = {
   xs: 4,
   sm: 8,
-  md: 16,
-  lg: 24,
-  xl: 32,
+  md: 12,
+  lg: 16,
+  xl: 20,
 };
 
 export const typography = {
   small: 12,
   regular: 14,
-  medium: 16,
-  large: 18,
-  xlarge: 24,
+  medium: 14,
+  large: 16,
+  xlarge: 18,
 };
 
 export const borderRadius = {
@@ -125,9 +127,58 @@ export const elevation = {
 };
 
 const createStyles = (colors) => StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  container: {
+    flex: 1,
+    padding: spacing.md,
+  },
+  categoryContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    padding: spacing.md,
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: spacing.xs,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: borderRadius.md,
+    paddingHorizontal: spacing.sm,
+    backgroundColor: colors.importButton,
+    color: colors.buttonText,
+    height: 30,
+    ...elevation.small,
+  },
+  backButtonText: {
+    color: colors.text,
+    marginLeft: spacing.sm,
+    fontSize: typography.medium,
+  },
+  searchInput: {
+    marginBottom: spacing.md,
+    backgroundColor: colors.surface,
+  },
+
+  commonSearchInput: {
+    flex: 1,
+    height: 10,
+    borderColor: colors.border,
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginRight: spacing.xs,
+    marginLeft: spacing.sm,
+  },
+  actionButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    padding: spacing.md,
   },
   headerContainer: {
     backgroundColor: colors.surface,
@@ -140,7 +191,7 @@ const createStyles = (colors) => StyleSheet.create({
   },
   titleRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
     alignItems: 'center',
     marginBottom: spacing.md,
     paddingVertical: spacing.sm,
@@ -216,40 +267,40 @@ const createStyles = (colors) => StyleSheet.create({
     ...elevation.small,
     shadowColor: colors.shadow,
   },
-  paginationContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: spacing.xs,
-    backgroundColor: colors.surface,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-  paginationButton: {
-    paddingLeft: '10%',
-    paddingRight: '10%',
-    paddingVertical: 4,
-    marginBottom: 2,
-    borderRadius: 20,
-    backgroundColor: colors.surface,
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 2,
-    overflow: 'hidden',
-  },
-  paginationText: {
-    fontSize: typography.regular,
-    color: colors.text,
-    paddingRight: 10,
-    paddingLeft: 10,
-  },
+  // paginationContainer: {
+  //   flexDirection: 'row',
+  //   justifyContent: 'center',
+  //   alignItems: 'center',
+  //   paddingVertical: spacing.xs,
+  //   backgroundColor: colors.surface,
+  //   borderTopWidth: 1,
+  //   borderTopColor: colors.border,
+  // },
+  // paginationButton: {
+  //   paddingLeft: '10%',
+  //   paddingRight: '10%',
+  //   paddingVertical: 4,
+  //   marginBottom: 2,
+  //   borderRadius: 20,
+  //   backgroundColor: colors.surface,
+  //   alignItems: 'center',
+  //   justifyContent: 'flex-start',
+  //   shadowOffset: { width: 0, height: 2 },
+  //   shadowOpacity: 0.25,
+  //   shadowRadius: 3.84,
+  //   elevation: 2,
+  //   overflow: 'hidden',
+  // },
+  // paginationText: {
+  //   fontSize: typography.regular,
+  //   color: colors.text,
+  //   paddingRight: 10,
+  //   paddingLeft: 10,
+  // },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: spacing.xs,
+    // marginVertical: spacing.xs,
     paddingRight: 7,
   },
   clearButton: {
@@ -262,19 +313,77 @@ const createStyles = (colors) => StyleSheet.create({
     color: colors.buttonText,
     fontSize: typography.small,
   },
-  searchInput: {
-    flex: 1,
-    height: 40,
-    borderColor: colors.border,
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginRight: spacing.xs,
-    marginLeft: spacing.sm,
-  },
-  box: {
-
-  },
+  
+  totalProductsContainer: {
+    padding: spacing.md,
+    marginVertical: spacing.sm,
+    backgroundColor: colors.surface,
+    borderRadius: borderRadius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...elevation.small,
+},
+totalProductsText: {
+    fontSize: typography.medium,
+    color: colors.text,
+    fontWeight: 'bold',
+    textAlign: 'center',
+},
+paginationContainer: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  padding: 10,
+  marginTop: 10,
+  // marginBottom: 60,
+  borderTopWidth: 1,
+  borderColor: '#ccc',
+},
+paginationButton: {
+  padding: 10,
+  backgroundColor: colors.importButton,
+  borderRadius: 5,
+},
+paginationButtonDisabled: {
+  backgroundColor: colors.border,
+},
+paginationText: {
+  color: colors.buttonText,
+  fontSize: 14,
+  fontWeight: 'bold',
+},
+paginationInfo: {
+  fontSize: 14,
+  color: colors.text,
+},
+  // searchInput: {
+  //   flex: 1,
+  //   height: 40,
+  //   borderColor: colors.border,
+  //   borderWidth: 1,
+  //   borderRadius: 5,
+  //   paddingHorizontal: 10,
+  //   marginRight: spacing.xs,
+  //   marginLeft: spacing.sm,
+  // },
+  // backButton: {
+  //   margin: spacing.sm,
+  //   padding: spacing.md,
+  //   backgroundColor: '#2196F3',
+  //   borderRadius: 5,
+  //   alignItems: 'center',
+  // },
+  // backButtonText: {
+  //   color: '#ffffff',
+  //   fontWeight: 'bold',
+  //   fontSize: typography.medium,
+  // },
+  // tableContainer: {
+  //   margin: spacing.md,
+  //   padding: spacing.md,
+  //   borderRadius: 5,
+  //   backgroundColor: lightColors.surface,
+  // },
 });
 
 export const getProductsStyles = (isDarkMode) => {

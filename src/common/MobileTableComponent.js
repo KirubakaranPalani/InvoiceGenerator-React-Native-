@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 import { lightTheme, darkTheme } from '../styles/theme';
@@ -13,26 +7,52 @@ import { lightTheme, darkTheme } from '../styles/theme';
 const MobileTableComponent = ({ data, onEdit, onDelete, showEditButton = true }) => {
   const { isDarkMode } = useTheme();
   const theme = isDarkMode ? darkTheme : lightTheme;
+  const styles = makeStyles(theme, showEditButton);
+
   const formatPrice = (price) => `₹${parseFloat(price).toFixed(2)}`;
 
-  const styles = makeStyles(theme);
+  // Render Header part
+  const renderHeader = () => (
+    <View style={styles.header}>
+      <Text style={[styles.headerCell, styles.serialCell]}>#</Text>
+      <Text style={[styles.headerCell, styles.productCell]}>Product Info</Text>
+      <Text style={[styles.headerCell, styles.qtyCell]}>Qty</Text>
+      <Text style={[styles.headerCell, styles.discountCell]}>Disc</Text>
+      <Text style={[styles.headerCell, styles.priceCell]}>Price</Text>
+      {!showEditButton && <Text style={[styles.headerCell, styles.categoryCell]}>Category</Text>}
+      <Text style={[styles.headerCell, styles.actionCell]}>Actions</Text>
+    </View>
+  );
 
-  const renderItem = ({ item, index }) => (
-    <View style={[styles.row, {backgroundColor: item.measurementType === 'gram' ? theme.colors.secondaryContainer : theme.colors.surface }]}>
-      <Text style={[styles.cell, styles.serialCell]}>{index + 1}</Text>
+  // Render rows
+  const renderRow = (item, index) => (
+
+    <View
+      key={item.id.toString()}
+      style={[
+        styles.row,
+        {
+          backgroundColor: item.measurementType === 'Kilogram'
+            ? theme.colors.secondaryContainer
+            : theme.colors.surface,
+        },
+      ]}
+    >
+      <Text style={[styles.cell, styles.serialCell]}>{item.serialNumber}</Text>
       <View style={[styles.cell, styles.productCell]}>
         <Text style={styles.productId} numberOfLines={2}>{item.id}</Text>
         <Text style={styles.productName} numberOfLines={4}>{item.name}</Text>
       </View>
-      {item.measurementType === 'gram' ? (
-        <Text style={[styles.cell, styles.qtyCell]}>{item.quantity} Kg</Text>) :
-        (
-          <Text style={[styles.cell, styles.qtyCell]}>{item.quantity} N</Text>
-        )
-      }
+      <Text style={[styles.cell, styles.qtyCell]}>
+        {item.quantity} {item.measurementType === 'Kilogram' ? 'Kg' : 'N'}
+      </Text>
       <Text style={[styles.cell, styles.discountCell]}>{item.discount || 0}%</Text>
       <Text style={[styles.cell, styles.priceCell]}>{formatPrice(item.price)}</Text>
-      <Text style={[styles.cell, styles.categoryCell]} numberOfLines={1}>{item.category}</Text>
+      {!showEditButton && (
+        <Text style={[styles.cell, styles.categoryCell]} numberOfLines={1}>
+          {item.category}
+        </Text>
+      )}
       <View style={[styles.cell, styles.actionCell]}>
         {showEditButton && (
           <TouchableOpacity
@@ -44,7 +64,7 @@ const MobileTableComponent = ({ data, onEdit, onDelete, showEditButton = true })
         )}
         <TouchableOpacity
           style={[styles.button, styles.deleteButton]}
-          onPress={() => onDelete(item.id)}
+          onPress={() => onDelete(item.id, item.name)}
         >
           <MaterialIcons name="delete" size={16} color={theme.colors.buttonText} />
         </TouchableOpacity>
@@ -54,27 +74,15 @@ const MobileTableComponent = ({ data, onEdit, onDelete, showEditButton = true })
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={[styles.headerCell, styles.serialCell]}>#</Text>
-        <Text style={[styles.headerCell, styles.productCell]}>Product Info</Text>
-        <Text style={[styles.headerCell, styles.qtyCell]}>Qty</Text>
-        <Text style={[styles.headerCell, styles.discountCell]}>Disc</Text>
-        <Text style={[styles.headerCell, styles.priceCell]}>Price</Text>
-        <Text style={[styles.headerCell, styles.categoryCell]}>Category</Text>
-        <Text style={[styles.headerCell, styles.actionCell]}>Actions</Text>
-      </View>
-      <ScrollView contentContainerStyle={styles.listContent}>
-        {data.map((item, index) => (
-          <View key={item.id.toString()}>
-            {renderItem({ item, index })}
-          </View>
-        ))}
+      {renderHeader()}
+      <ScrollView>
+      {data.map((item, index) => renderRow(item, index))}
       </ScrollView>
     </View>
   );
 };
 
-const makeStyles = (theme) => StyleSheet.create({
+const makeStyles = (theme, showEditButton) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.surface,
@@ -91,10 +99,11 @@ const makeStyles = (theme) => StyleSheet.create({
     fontSize: theme.typography.small,
     fontWeight: '600',
     textAlign: 'center',
+    flex:1,
   },
-  listContent: {
-    paddingVertical: theme.spacing.sm,
-  },
+  // listContent: {
+  //   paddingVertical: theme.spacing.sm,
+  // },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -111,6 +120,7 @@ const makeStyles = (theme) => StyleSheet.create({
   cell: {
     fontSize: theme.typography.small,
     color: theme.colors.text,
+    flex: 1,
     textAlign: 'center',
     paddingHorizontal: theme.spacing.xs,
   },
@@ -140,10 +150,10 @@ const makeStyles = (theme) => StyleSheet.create({
     width: '15%',
   },
   categoryCell: {
-    width: '20%',
+    width: showEditButton ? 1 : 0,
   },
   actionCell: {
-    width: '15%',
+    width: 1.5,
     flexDirection: 'row',
     justifyContent: 'center',
     gap: theme.spacing.xs,

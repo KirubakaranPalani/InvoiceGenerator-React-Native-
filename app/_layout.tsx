@@ -8,8 +8,8 @@ import { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import { Asset } from 'expo-asset';
-import { Animated } from 'react-native';
-import WelcomeScreen from '../src/components/WelcomeScreen'; // Ensure this path is correct
+import { Animated, View } from 'react-native';
+import WelcomeScreen from '../src/common/WelcomeScreen'; // Ensure this path is correct
 
 const customTheme = {
   ...MD3LightTheme,
@@ -30,53 +30,38 @@ const preloadAssets = async () => {
     // Add more assets here as needed
   ];
 
-  const cacheAssets = assets.map((asset) => Asset.fromModule(asset).downloadAsync());
-  await Promise.all(cacheAssets);
+  try {
+    const cacheAssets = assets.map((asset) => Asset.fromModule(asset).downloadAsync());
+    await Promise.all(cacheAssets);
+  } catch (error) {
+    console.error('Error preloading assests:', error);
+  }
 };
 
 const AppContent = () => {
   const db = useSQLiteContext();
   const [isAppReady, setIsAppReady] = useState(false);
   const [showWelcome, setShowWelcome] = useState(true);
-  const opacity = new Animated.Value(0); // For fade-in animation
+  const opacity = new Animated.Value(10); // For fade-in animation
 
   useEffect(() => {
     const initializeDatabase = async () => {
       try {
         await db.execAsync(`
-          CREATE TABLE IF NOT EXISTS measurement_types (
+          CREATE TABLE IF NOT EXISTS products (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT UNIQUE
+            name TEXT NOT NULL,
+            price INTEGER NOT NULL,
+            quantity INTEGER NOT NULL,
+            category TEXT,
+            discount INTEGER,
+            measurementType TEXT,
+            subProductCategory TEXT
           );
         `);
-
-        await db.execAsync(`
-          INSERT OR IGNORE INTO measurement_types (name) VALUES 
-          ('unit'),
-          ('gram');
-        `);
-
-        await db.execAsync(`
-          ALTER TABLE products ADD COLUMN measurementTypeId INTEGER;
-        `);
       } catch (error) {
-        if (!error.message.includes('duplicate column name')) {
-          console.error('Error initializing database:', error);
-        }
+        console.error('Error initializing database:', error);
       }
-
-      await db.execAsync(`
-        CREATE TABLE IF NOT EXISTS products (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          name TEXT,
-          price REAL,
-          quantity INTEGER,
-          category TEXT,
-          discount REAL,
-          measurementTypeId INTEGER DEFAULT 1,
-          FOREIGN KEY (measurementTypeId) REFERENCES measurement_types (id)
-        );
-      `);
     };
 
     const initializeApp = async () => {

@@ -6,14 +6,11 @@ const ProductContext = createContext();
 export const ProductProvider = ({ children }) => {
   const db = useSQLiteContext();
   const [products, setProducts] = useState([]);
-  const [measurementTypes, setMeasurementTypes] = useState([]);
 
   const fetchProducts = async () => {
     try {
       const result = await db.getAllAsync(`
-        SELECT products.*, measurement_types.name AS measurementType 
-        FROM products 
-        LEFT JOIN measurement_types ON products.measurementTypeId = measurement_types.id
+        SELECT * FROM products
       `);
       setProducts(result);
     } catch (error) {
@@ -23,13 +20,11 @@ export const ProductProvider = ({ children }) => {
 
   const addProduct = async (product) => {
     try {
-      // Set measurementTypeId to 1 (unit) if not provided
-      const measurementTypeId = product.measurementTypeId || 1;
 
       await db.runAsync(
         `INSERT INTO products 
-        (id, name, price, quantity, category, discount, measurementTypeId) 
-        VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        (id, name, price, quantity, category, discount, measurementType, subProductCategory) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           product.id,
           product.name,
@@ -37,18 +32,14 @@ export const ProductProvider = ({ children }) => {
           product.quantity,
           product.category,
           product.discount || 0,
-          measurementTypeId,
+          product.measurementType,
+          product.subProductCategory,
         ]
       );
       await fetchProducts(); // Refresh products
     } catch (error) {
       console.error('Error adding product:', error);
     }
-  };
-
-  const fetchMeasurementTypes = async (db) => {
-    const results = await db.getAllAsync('SELECT * FROM measurement_types');
-    return results;
   };
 
   const removeProduct = async (id) => {
@@ -61,15 +52,12 @@ export const ProductProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    (async () => {
-      const types = await fetchMeasurementTypes(db);
-      setMeasurementTypes(types);
-      await fetchProducts();
-    })();
+    fetchProducts();
   }, []);
 
+
   return (
-    <ProductContext.Provider value={{ products, measurementTypes, addProduct, fetchProducts }}>
+    <ProductContext.Provider value={{ products, addProduct, fetchProducts, removeProduct, }}>
       {children}
     </ProductContext.Provider>
   );

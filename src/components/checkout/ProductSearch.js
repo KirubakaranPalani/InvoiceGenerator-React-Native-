@@ -104,7 +104,7 @@ const ProductSearch = ({
         styles.dropdownItemText,
         { color: isDarkMode ? '#ffffff' : '#000000' }
       ]}>
-        {`${item.id} - ${item.name} - ₹${item.price} (${(item.measurementType === 'gram' ? 'Kg' : 'Unit')})`}
+        {`${item.id} - ${item.name} - ₹${item.price} (${(item.measurementType === 'Kilogram' ? 'Kg' : 'Unit')})`}
       </Text>
     </TouchableOpacity>
   );

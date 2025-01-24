@@ -4,7 +4,7 @@
     "slug": "BillingSystem",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/logo/sm.png",
+    "icon": "./assets/logo/Appicon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "assetBundlePatterns": [

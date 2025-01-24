@@ -40,6 +40,12 @@ const createStyles = (colors) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-start',
   },
+  radioGroup1: {
+    // flex: 1, 
+    // // flexDirection: 'row',
+    alignItems: 'center',
+    // justifyContent: 'space-evenly'
+  },
   radioRow: {
     flexDirection: 'row',
     alignItems: 'center',

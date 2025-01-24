@@ -3,14 +3,17 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, Alert } fro
 import { RadioButton } from 'react-native-paper';
 
 const EditModal = ({ visible, product, onClose, onSave }) => {
-  const [form, setForm] = useState({
+  const [form, setForm] = useState(initialFormState);
+  const initialFormState = {
     id: '',
     name: '',
     price: '',
     quantity: '',
-    discount: 0,
-    measurementTypeId: 1,
-  });
+    discount: '',
+    category: 'Electricals',
+    measurementType: 'Unit', // Default to 'Unit'
+    subProductCategory: '',
+  }
 
   // Sync form with product when product changes
   useEffect(() => {
@@ -21,29 +24,53 @@ const EditModal = ({ visible, product, onClose, onSave }) => {
         price: product.price || '',
         quantity: product.quantity || '',
         discount: product.discount || 0,
-        measurementTypeId: product.measurementTypeId || 1,
+        category: product.category || 'Electricals',
+        measurementType: product.measurementType || 'Unit', // Default if not provided
+        subProductCategory: product.subProductCategory || '',
       });
+    } else {
+      setForm(initialFormState);
     }
   }, [product]);
 
-  const handleSave = () => {
-    if (!form.id || !form.name || !form.price || !form.quantity || !form.measurementTypeId) {
+  const handleInputChange = (field, value) => {
+    setForm((prevForm) => ({
+      ...prevForm,
+      [field]: value,
+    }));
+  };
+
+  const validateAndSave = () => {
+    const requiredFields = ['name', 'price', 'quantity', 'category'];
+    const isValid = requiredFields.every((field) => form[field]);
+    if (!isValid) {
       Alert.alert('Error', 'Please fill all required fields.');
       return;
     }
     onSave(form);
   };
+  const renderRadioGroup = (label, options, selectedValue, onChange) => (
+    <View>
+      <Text style={styles.label}>{label}</Text>
+      <RadioButton.Group onValueChange={onChange} value={selectedValue}>
+        <View style={styles.radioGroup}>
+          {options.map(({ value, label }) => (
+            <TouchableOpacity
+              key={value}
+              style={styles.radioRow}
+              onPress={() => onChange(value)}
+            >
+              <RadioButton value={value} />
+              <Text style={styles.radioLabel}>{label}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </RadioButton.Group>
+    </View>
+  );
 
-  const getMeasurementLabel = (measurementTypeId) => {
-    switch (measurementTypeId) {
-      case 1:
-        return 'Quantity (Unit)';
-      case 2:
-        return 'Quantity (Kilogram)';
-      default:
-        return 'Quantity';
-    }
-  };
+  const getMeasurementLabel = (type) =>
+    type === 'Kilogram' ? 'Quantity (Kilogram)' : 'Quantity (Unit)';
 
   return (
     <Modal animationType="slide" transparent={true} visible={visible} onRequestClose={onClose}>
@@ -51,13 +78,13 @@ const EditModal = ({ visible, product, onClose, onSave }) => {
         <View style={styles.modalContent}>
           <Text style={styles.modalTitle}>Edit Product</Text>
 
-          <Text style={styles.label}>Product ID: {form.id}</Text>
+          <Text style={styles.label}>Product ID: {form?.id}</Text>
 
           <Text style={styles.label}>Name</Text>
           <TextInput
             style={styles.input}
             value={form?.name}
-            onChangeText={(text) => setForm({ ...form, name: text })}
+            onChangeText={(text) => handleInputChange('name', text)}
           />
 
           <Text style={styles.label}>Price</Text>
@@ -65,7 +92,7 @@ const EditModal = ({ visible, product, onClose, onSave }) => {
             style={styles.input}
             keyboardType="numeric"
             value={String(form?.price)}
-            onChangeText={(text) => setForm({ ...form, price: Number(text) })}
+            onChangeText={(text) => handleInputChange('price', parseFloat(text) || 0)}
           />
 
           <Text style={styles.label}>Discount</Text>
@@ -73,38 +100,47 @@ const EditModal = ({ visible, product, onClose, onSave }) => {
             style={styles.input}
             keyboardType="numeric"
             value={String(form?.discount || 0)}
-            onChangeText={(text) => setForm({ ...form, discount: Number(text) })}
+            onChangeText={(text) => handleInputChange('discount', parseFloat(text) || 0)}
           />
-          <Text style={styles.label}>Measurement Type</Text>
-          <RadioButton.Group
-            onValueChange={(value) => setForm({ ...form, measurementTypeId: Number(value) })}
-            value={form?.measurementTypeId}
-          >
-            <View style={styles.radioGroup}>
-              <TouchableOpacity style={styles.radioRow}
-               onPress={() =>setForm({ ...form, measurementTypeId: 1 })}>
-                <RadioButton value={1} />
-                <Text style={styles.radioLabel}>Unit</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.radioRow}
-               onPress={() =>setForm({ ...form, measurementTypeId: 2 })}>
-                <RadioButton value={2} />
-                <Text style={styles.radioLabel}>Kilogram</Text>
-              </TouchableOpacity>
-            </View>
-          </RadioButton.Group>
+          {renderRadioGroup(
+            'Measurement Type',
+            [
+              { value: 'Unit', label: 'Unit' },
+              { value: 'Kilogram', label: 'Kilogram' },
+            ],
+            form?.measurementType,
+            (value) => handleInputChange('measurementType', value)
+          )}
 
           {/* Quantity Field with Dynamic Label */}
-          <Text style={styles.label}>{getMeasurementLabel(form?.measurementTypeId)}</Text>
+          <Text style={styles.label}>{getMeasurementLabel(form?.measurementType)}</Text>
           <TextInput
             style={styles.input}
             keyboardType="numeric"
             value={String(form?.quantity)}
-            onChangeText={(text) => setForm({ ...form, quantity: Number(text) })}
+            onChangeText={(text) => handleInputChange('quantity', parseFloat(text) || 0)}
+          />
+
+          {renderRadioGroup(
+            'Category',
+            [
+              { value: 'Electricals', label: 'Electricals' },
+              { value: 'Plumbing', label: 'Plumbing' },
+              { value: 'Others', label: 'Others' },
+            ],
+            form?.category,
+            (value) => handleInputChange('category', value)
+          )}
+
+          <Text style={styles.label}>Sub-Product Category</Text>
+          <TextInput
+            style={styles.input}
+            value={form?.subProductCategory}
+            onChangeText={(text) => handleInputChange('subProductCategory', text)}
           />
 
           <View style={styles.modalActions}>
-            <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+            <TouchableOpacity style={styles.saveButton} onPress={validateAndSave}>
               <Text style={styles.buttonText}>Save</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
@@ -129,8 +165,8 @@ const styles = StyleSheet.create({
   buttonText: { color: '#fff', textAlign: 'center' },
   radioGroup: {
     flexDirection: 'row', // Align radio buttons horizontally
-    marginTop:10,
-    marginBottom:10,
+    marginTop: 10,
+    marginBottom: 10,
     alignItems: 'center',
     justifyContent: 'flex-start', // Ensures items align to the left
   },
@@ -143,7 +179,7 @@ const styles = StyleSheet.create({
     marginLeft: 4,
     color: '#00e0ff',
     marginRight: 23,
-    
+
   },
 });
 
