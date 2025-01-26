@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 import { lightTheme, darkTheme } from '../styles/theme';
@@ -25,8 +25,7 @@ const MobileTableComponent = ({ data, onEdit, onDelete, showEditButton = true })
   );
 
   // Render rows
-  const renderRow = (item, index) => (
-
+  const renderRow = ({ item, index }) => (
     <View
       key={item.id.toString()}
       style={[
@@ -38,7 +37,7 @@ const MobileTableComponent = ({ data, onEdit, onDelete, showEditButton = true })
         },
       ]}
     >
-      <Text style={[styles.cell, styles.serialCell]}>{item.serialNumber}</Text>
+      <Text style={[styles.cell, styles.serialCell]}>{item.serialNumber || index + 1}</Text>
       <View style={[styles.cell, styles.productCell]}>
         <Text style={styles.productId} numberOfLines={2}>{item.id}</Text>
         <Text style={styles.productName} numberOfLines={4}>{item.name}</Text>
@@ -75,9 +74,14 @@ const MobileTableComponent = ({ data, onEdit, onDelete, showEditButton = true })
   return (
     <View style={styles.container}>
       {renderHeader()}
-      <ScrollView>
-      {data.map((item, index) => renderRow(item, index))}
-      </ScrollView>
+      <FlatList
+        data={data}
+        renderItem={renderRow}
+        keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={{ flexGrow: 1 }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      />
     </View>
   );
 };
@@ -90,20 +94,18 @@ const makeStyles = (theme, showEditButton) => StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme.colors.tableHeader,
     paddingVertical: theme.spacing.md,
     paddingHorizontal: theme.spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
   },
   headerCell: {
     color: theme.colors.tableHeaderText,
     fontSize: theme.typography.small,
     fontWeight: '600',
     textAlign: 'center',
-    flex:1,
+    flex: 1,
   },
-  // listContent: {
-  //   paddingVertical: theme.spacing.sm,
-  // },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -111,11 +113,8 @@ const makeStyles = (theme, showEditButton) => StyleSheet.create({
     marginHorizontal: theme.spacing.xs,
     marginBottom: theme.spacing.xs,
     borderRadius: theme.borderRadius.md,
-    elevation: 2,
-    shadowColor: theme.colors.shadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   cell: {
     fontSize: theme.typography.small,
@@ -125,10 +124,10 @@ const makeStyles = (theme, showEditButton) => StyleSheet.create({
     paddingHorizontal: theme.spacing.xs,
   },
   serialCell: {
-    width: '10%',
+    flex: 1,
   },
   productCell: {
-    width: '20%',
+    flex: 3,
   },
   productId: {
     fontSize: theme.typography.small,

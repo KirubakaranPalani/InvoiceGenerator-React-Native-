@@ -20,6 +20,12 @@ const ProductsContent = ({
     products,
     fetchProducts,
     setLoading,
+    searchTerm,
+    setSearchTerm,
+    commonSearchTerm,
+    setCommonSearchTerm,
+    subSearchTerm,
+    setSubSearchTerm,
 }) => {
     const db = useSQLiteContext();
     const { isDarkMode } = useTheme();
@@ -27,9 +33,7 @@ const ProductsContent = ({
     const { showToast } = useToast();
     const [keyboardVisible, setKeyboardVisible] = useState(false);
 
-    const [searchTerm, setSearchTerm] = useState('');
-    const [commonSearchTerm, setCommonSearchTerm] = useState('');
-    const [subSearchTerm, setSubSearchTerm] = useState('');
+   
 
     useEffect(() => {
         const showListener = Keyboard.addListener('keyboardDidShow', () => setKeyboardVisible(true));
@@ -79,10 +83,15 @@ const ProductsContent = ({
         return products.filter((product) => {
             const isInCategory = selectedCategory === 'All' || product.category === selectedCategory;
             const isInSubCategory = !selectedSubCategory || product.subProductCategory === selectedSubCategory;
-            const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) || product.id.toString().startsWith(searchTerm);
+            const matchesSearch =
+            commonSearchTerm
+                ? product.name.toLowerCase().includes(commonSearchTerm.toLowerCase()) ||
+                  product.id.toString().startsWith(commonSearchTerm)
+                : product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                  product.id.toString().startsWith(searchTerm);
             return isInCategory && isInSubCategory && matchesSearch;
         });
-    }, [products, selectedCategory, selectedSubCategory, searchTerm]);
+    }, [products, selectedCategory, selectedSubCategory, searchTerm, commonSearchTerm]);
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
@@ -294,7 +303,7 @@ const ProductsContent = ({
 
     const renderCategoryGrid = (categories, counts, countLabel, onPress) => (
         <ScrollView>
-            <View style={styles.categoryContainer}>
+            <View style={[styles.categoryContainer, { marginBottom: keyboardVisible ? 0 : 60 }]}>
                 {categories.map((category, index) => (
                     <CategoryBoxComponent
                         key={index}
@@ -322,31 +331,17 @@ const ProductsContent = ({
         // If no category selected, show category grid
         if (!selectedCategory) {
             return (
+                // product home page
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                    <KeyboardAvoidingView behavior='padding' style={{ flex: 1 }}>
+                    <KeyboardAvoidingView behavior='height' style={{ flex: 1 }}>
                         {renderActionButtons(processImportedData, products, handleDeleteAll)}
-                        {renderSearchBar(commonSearchTerm, setCommonSearchTerm, 'Search Products from whole file...')}
                         <View style={styles.totalProductsContainer}><Text style={[styles.totalProductsText]}>Total number of products: {products.length}</Text></View>
-                        {!commonSearchTerm ?
-                            renderCategoryGrid(
+                            {renderCategoryGrid(
                                 filteredCategories,
                                 categorySubcategoryCountsBySize,
                                 { singular: 'Category', plural: 'Categories' }, // Display "Categories" here
                                 setSelectedCategory
-                            )
-                            :
-                            <>
-                                {/* <ScrollView> */}
-                                <MobileTableComponent
-                                    data={paginatedProducts}
-                                    onEdit={handleProductEdit}
-                                    onDelete={handleProductDelete}
-                                    showEditButton={true}
-                                />
-                                {/* </ScrollView> */}
-                                {renderPaginationControls()}
-                            </>
-                        }
+                            )}
                     </KeyboardAvoidingView>
                 </TouchableWithoutFeedback>
             );
@@ -354,10 +349,11 @@ const ProductsContent = ({
 
         if (selectedCategory === 'All') {
             return (
+                // all products
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                    <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
+                    <KeyboardAvoidingView behavior="height" style={{ flex: 1 }}>
                         <View style={styles.titleRow}>
-                            <TouchableOpacity style={styles.backButton} onPress={() => setSelectedCategory(null)}>
+                            <TouchableOpacity style={styles.backButton} onPress={() => { setSelectedCategory(null), setCommonSearchTerm('') }}>
                                 <MaterialIcons name="arrow-back" size={24} color={styles.buttonText.color} />
                                 <Text style={styles.buttonText}>Back to Categories</Text>
                             </TouchableOpacity>
@@ -365,6 +361,7 @@ const ProductsContent = ({
                                 Total Products: {filteredProducts.length}
                             </Text>
                         </View>
+                        {renderSearchBar(commonSearchTerm, setCommonSearchTerm, 'Search Products from whole file...')}
                         <MobileTableComponent data={paginatedProducts} onEdit={handleProductEdit} onDelete={handleProductDelete} />
                         {renderPaginationControls()}
                     </KeyboardAvoidingView>
@@ -375,7 +372,7 @@ const ProductsContent = ({
         if (!selectedSubCategory) {
             return (
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                    <KeyboardAvoidingView behavior='padding' style={{ flex: 1 }}>
+                    <KeyboardAvoidingView behavior='height' style={{ flex: 1 }}>
                         <View style={styles.titleRow}>
                             <TouchableOpacity style={styles.backButton} onPress={() => { setSelectedCategory(null), setSubSearchTerm('') }}>
                                 <MaterialIcons name="arrow-back" size={24} color={styles.buttonText.color} />
@@ -400,7 +397,7 @@ const ProductsContent = ({
         // If category is selected, show products in mobile table
         return (
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                <KeyboardAvoidingView behavior='padding' style={{ flex: 1 }}>
+                <KeyboardAvoidingView behavior='height' style={{ flex: 1 }}>
                     <View style={styles.titleRow}>
                         <TouchableOpacity style={styles.backButton} onPress={() => { setSelectedSubCategory(null), setSearchTerm('') }}>
                             <MaterialIcons name="arrow-back" size={24} color={styles.buttonText.color} />

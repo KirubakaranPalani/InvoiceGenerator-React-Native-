@@ -43,7 +43,7 @@ const WelcomeScreen = ({ onAnimationEnd }) => {
   return (
     <Animated.View style={[styles.container, { backgroundColor: interpolatedBackgroundColor }]}>
       <Image
-        source={require('../../assets/logo/Appicon.png')} // Adjust your path here
+        source={require('../../assets/logo/react-logo.png')} // Adjust your path here
         style={styles.logo}
         resizeMode="contain"
       />
