@@ -23,10 +23,7 @@ const customTheme = {
 
 const preloadAssets = async () => {
   const assets = [
-    require('../assets/logo/SmLogo.png'),
-    require('../assets/logo/electricalLogo.png'),
-    require('../assets/logo/Plumbing.png'),
-    require('../assets/logo/SMWelcomeLogo.png'),
+    require('../assets/logo/react-logo.png'),
     // Add more assets here as needed
   ];
 

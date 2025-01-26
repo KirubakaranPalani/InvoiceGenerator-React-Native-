@@ -17,8 +17,10 @@ import MinimizedCheckoutSummary from '../components/checkout/MinimizedCheckoutSu
 import ProductSearch from '../components/checkout/ProductSearch';
 import getCheckoutStyles from '../styles/CheckoutStyles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
 
 const Checkout = () => {
+  const router = useRouter();
   const { isDarkMode } = useTheme();
   const styles = getCheckoutStyles(isDarkMode);
   const [checkoutItems, setCheckoutItems] = useState([]);
@@ -28,13 +30,13 @@ const Checkout = () => {
   const [customerName, setCustomerName] = useState('');
   const [keyboardOn, setKeyboardOn] = useState(false);
   const [invoiceNumber, setInvoiceNumber] = useState('');
-
+  
   // Calculate and update summary when checkoutItems change
   useEffect(() => {
     calculateSummary();
   }, [checkoutItems]);
-
-
+  
+  
   // Manage keyboard visibility
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener('keyboardDidShow', () => {
@@ -43,59 +45,74 @@ const Checkout = () => {
     const keyboardDidHideListener = Keyboard.addListener('keyboardDidHide', () => {
       setKeyboardOn(false); // Restore margin when keyboard is closed
     });
-
+    
     return () => {
       keyboardDidHideListener.remove();
       keyboardDidShowListener.remove();
     };
   }, []);
+  
 
   // Generate Invoice Number
   const generateInvoiceNumber = async () => {
-    const today = new Date();
-    const datePart = `${String(today.getDate()).padStart(2, '0')}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getFullYear()).slice(2)}`;
-    let sequentialNumber = 1;
-
-    const lastInvoiceData = await AsyncStorage.getItem('lastInvoice');
-    if (lastInvoiceData) {
-      const { lastDate, lastNumber } = JSON.parse(lastInvoiceData);
-      if (lastDate === datePart) {
-        sequentialNumber = lastNumber + 1;
+    try {
+      // Get today's date in DDMMYY format
+      const today = new Date();
+      const datePart = `${String(today.getDate()).padStart(2, '0')}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getFullYear()).slice(2)}`;
+      let sequentialNumber = 1;
+  
+      // Retrieve last invoice data from AsyncStorage
+      const lastInvoiceData = await AsyncStorage.getItem('lastInvoice');
+      if (lastInvoiceData) {
+        const { lastDate, lastNumber } = JSON.parse(lastInvoiceData);
+  
+        // If the stored date matches today's date, increment the invoice number
+        if (lastDate === datePart) {
+          sequentialNumber = lastNumber + 1;
+        }
       }
+  
+      // Generate new invoice number
+      const newInvoiceNumber = `${datePart}-${String(sequentialNumber).padStart(3, '0')}`;
+      
+      // Save the new invoice details to AsyncStorage
+      await AsyncStorage.setItem(
+        'lastInvoice',
+        JSON.stringify({ lastDate: datePart, lastNumber: sequentialNumber })
+      );
+  
+      // Update the state
+      setInvoiceNumber(newInvoiceNumber);
+  
+      return newInvoiceNumber;
+    } catch (error) {
+      console.error('Error generating invoice number:', error);
+      Alert.alert('Error', 'Failed to generate invoice number.');
+      return null;
     }
-
-    const newInvoiceNumber = `${datePart}-${String(sequentialNumber).padStart(3, '0')}`;
-    setInvoiceNumber(newInvoiceNumber);
-
-    // Save the new invoice number
-    await AsyncStorage.setItem(
-      'lastInvoice',
-      JSON.stringify({ lastDate: datePart, lastNumber: sequentialNumber })
-    );
-
-    return newInvoiceNumber;
   };
-
+  
+  
   const calculateSummary = () => {
     const totalQuantitySum = checkoutItems.reduce((sum, item) => sum + (item.measurementType === 'Kilogram' ? 1 : item.quantity), 0);
     const totalCost = checkoutItems.reduce((sum, item) => sum + item.totalPrice, 0);
-
+    
     setTotalProducts(checkoutItems.length);
     setTotalQuantity(totalQuantitySum);
     setTotalPrice(totalCost);
   };
-
+  
   // Add product to checkout
   const handleAddToCheckout = (product) => {
     if (!product) return;
-
+    
     setCheckoutItems((prevItems) => {
       const existingIndex = prevItems.findIndex((item) => item.id === product.id);
-
+      
       if (existingIndex > -1) {
         const updatedItems = [...prevItems];
         const existingItem = updatedItems[existingIndex];
-
+        
         updatedItems[existingIndex] = {
           ...existingItem,
           quantity: existingItem.quantity + 1,
@@ -104,10 +121,10 @@ const Checkout = () => {
             quantity: existingItem.quantity + 1,
           }),
         };
-
+        
         return updatedItems;
       }
-
+      
       return [
         ...prevItems,
         {
@@ -142,7 +159,7 @@ const Checkout = () => {
   };
 
   const parseNumericValue = (value) => {
-    if (value === '' || value === '.') return '0.'; // Allow intermediate '.' or empty input
+    if (value === '' || value === '.') return 0; // Allow intermediate '.' or empty input
     const numericValue = parseFloat(value);
     return isNaN(numericValue) ? 0 : numericValue.toString(); // Convert back to string
   };
@@ -165,45 +182,22 @@ const Checkout = () => {
   };
 
   // Generate and print PDF invoice
-  const handleGeneratePDF = async () => {
-    try {
 
+  const handleGeneratePDF = async () => {
+  
+    try {
+      // Generate the HTML content for the invoice
       if (!invoiceNumber) {
-        // Generate invoice number if not already generated
         await generateInvoiceNumber();
       }
-
-
-      // Generate Invoice HTML
       const invoiceHTML = generateInvoiceHTML();
-
-      // Generate and preview PDF
-      const { uri } = await Print.printToFileAsync({ html: invoiceHTML });
-      await Print.printAsync({ uri });
-
-      Alert.alert(
-        'PDF Generated!',
-        'Do you want to confirm this invoice number?',
-        [
-          {
-            text: 'Cancel',
-            style: 'cancel',
-            onPress: () => {
-              console.log('Invoice confirmation canceled.');
-            },
-          },
-          {
-            text: 'OK',
-            onPress: async () => {
-              // Update the invoice number only when confirmed
-              await generateInvoiceNumber();
-            },
-          },
-        ]
-      );
+      // Pass the HTML content to the PDF preview screen
+      router.push({
+        pathname: '/pdf-preview',
+        params: { invoiceHTML },
+      });
     } catch (error) {
-      console.error('Error generating PDF:', error);
-      Alert.alert('Error', 'Failed to generate or preview PDF.');
+      Alert.alert('Error', 'Failed to navigate to PDF preview.');
     }
   };
 
@@ -331,10 +325,10 @@ const Checkout = () => {
           <div class="invoice-header">
               <div class="shop-details">
                   <div class="logo">SM</div>
-                  <div class="shop-details-text"><strong>SM Electricals & Plumbings</strong></div>
-                  <div class="shop-details-text">No.56A, Arni Rd, Virupatchipuram,</div>
-                  <div class="shop-details-text">RV Nagar, Vellore, Tamil Nadu 632002</div>
-                  <div class="shop-details-text"><strong>Phone:</strong> +91 9442731274</div>
+                  <div class="shop-details-text"><strong>shop name</strong></div>
+                  <div class="shop-details-text">shop address,</div>
+                  <div class="shop-details-text">shop area</div>
+                  <div class="shop-details-text"><strong>Phone:</strong>number</div>
               </div>
               <div class="invoice-details">
                   <p><strong>Invoice No:</strong> ${invoiceNumber}</p>

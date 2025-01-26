@@ -4,7 +4,7 @@
     "slug": "BillingSystem",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/logo/Appicon.png",
+    "icon": "./assets/logo/react-logo.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "assetBundlePatterns": [
@@ -18,7 +18,7 @@
       "backgroundColor": "#000000"
     },
     "splash": {
-      "image": "./assets/logo/sm.png",
+      "image": "./assets/logo/react-logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff" // Match androidStatusBar.backgroundColor
     },
@@ -28,7 +28,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/logo/sm.png",
+        "foregroundImage": "./assets/logo/react-logo.png",
         "backgroundColor": "#0000"
       },
       "package": "com.karanmsd.BillingSystem"
@@ -36,19 +36,20 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/logo/sm.png"
+      "favicon": "./assets/logo/react-logo.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/logo/sm.png",
+          "image": "./assets/logo/react-logo.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "expo-sqlite"
     ],
     "experiments": {
       "typedRoutes": true

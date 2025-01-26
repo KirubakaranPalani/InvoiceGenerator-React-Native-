@@ -23,12 +23,18 @@ const Products = () => {
   const [selectedSubCategory, setSelectedSubCategory] = useState(null);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [commonSearchTerm, setCommonSearchTerm] = useState('');
+  const [subSearchTerm, setSubSearchTerm] = useState('');
 
   useFocusEffect(
     React.useCallback(() => {
       const onBackPress = () => {
         if (selectedCategory) {
           setSelectedCategory(null);
+          setSearchTerm('')
+          setCommonSearchTerm('')
+          setSubSearchTerm('')
           return true; // Prevent default back action
         }
         return false; // Allow default back action
@@ -40,6 +46,23 @@ const Products = () => {
         BackHandler.removeEventListener('hardwareBackPress', onBackPress);
       };
     }, [selectedCategory])
+  );
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        if (selectedSubCategory) {
+          setSelectedSubCategory(null);
+          return true; // Prevent default back action
+        }
+        return false; // Allow default back action
+      };
+
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      return () => {
+        BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+      };
+    }, [selectedSubCategory])
   );
 
   useFocusEffect(
@@ -102,6 +125,12 @@ const Products = () => {
         products={products}
         fetchProducts={fetchProducts}
         setLoading={setLoading}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        commonSearchTerm={commonSearchTerm}
+        setCommonSearchTerm={setCommonSearchTerm}
+        subSearchTerm={subSearchTerm}
+        setSubSearchTerm={setSubSearchTerm}
       />
       {/* {renderContent()} */}
       {isEditModalVisible && (
